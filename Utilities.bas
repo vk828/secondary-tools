@@ -104,8 +104,10 @@ Function IsSheetFound(ByVal wkb As Workbook, ByVal sheetName As String)
     IsSheetFound = False
 End Function
 
-Function AssembleRangeComponentsToRange(columnIndex As Integer, rowIndex_wkb As Integer, _
-                                        rowIndex_wksh As Integer, rowIndex_rng As Integer, _
+Function AssembleRangeComponentsToRange(columnIndex As Integer, _
+                                        rowIndex_wkb As Integer, _
+                                        rowIndex_wksh As Integer, _
+                                        rowIndex_rng As Integer, _
                                         sourceSheet As Worksheet) As Range
 'this function returns a range built from range components listed on a sheet
 
@@ -294,11 +296,11 @@ Sub OpenNewWorkbook()
         strFile = Application.GetOpenFilename("Excel-files,*.xlsx", 1, "Select the Billing Grid file", "Open", False)
     Else
         ' Is a Mac and will test if running Excel 2011 or higher.
-        If Val(Application.Version) > 16 Then
+        If val(Application.Version) > 16 Then
             strFile = SelectFileOrFilesMac
             strFile = Replace(strFile, ":", "/")
             strFile = Replace(strFile, "Macintosh HD", "")
-        ElseIf Val(Application.Version) > 14 Then
+        ElseIf val(Application.Version) > 14 Then
             strFile = SelectFileOrFilesMac
         End If
     End If

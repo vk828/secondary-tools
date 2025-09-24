@@ -1,13 +1,52 @@
 Attribute VB_Name = "tool2_cases"
 'Author/Developer: Vadim Krifuks
-'Last Updated: July2025
+'Last Updated: 22 September 2025
 
 Option Explicit
 Option Private Module
 
+Sub ProcedureNotFound(procedureRng As Range, gridRowRng As Range, fillColor As Long)
+
+    If Not (AreAllCellsEmpty(procedureRng) And AreAllCellsEmpty(gridRowRng)) Then
+        Dim msg As String
+        msg = tool2_main.AssembleComment("procedure not found in OnCore; row skipped")
+        
+        Call tool2_main.AddComment(procedureRng, msg)
+        
+        procedureRng.Interior.color = fillColor
+        gridRowRng.Interior.color = fillColor
+    End If
+    
+End Sub
+
+Sub VisitNotFound(visitRng As Range, gridColRng As Range, fillColor As Long)
+
+    If Not (AreAllCellsEmpty(visitRng) And AreAllCellsEmpty(gridColRng)) Then
+        Dim msg As String
+        msg = tool2_main.AssembleComment("visit not found in OnCore; column skipped")
+    
+        Call tool2_main.AddComment(visitRng, msg)
+        
+        visitRng.Interior.color = fillColor
+        gridColRng.Interior.color = fillColor
+    End If
+
+End Sub
+
 Sub PrevAndCurrEqualNothing(cell As Range, fillColor As Long)
     cell.Interior.color = fillColor
 End Sub
+
+Function AreAllCellsEmpty(rng As Range) As Boolean
+    Dim cell As Range
+    For Each cell In rng.Cells
+        If CStr(cell.Value) <> "" Then
+            AreAllCellsEmpty = False
+            Exit Function
+        End If
+    Next cell
+    AreAllCellsEmpty = True
+End Function
 
 Sub PrevAndCurrEqualX(cell As Range, fillColor As Long)
     cell.Interior.color = fillColor
@@ -15,24 +54,24 @@ End Sub
 
 Sub PrevNothingCurrX(cell As Range, fillColor As Long, prevValue As Variant, currValue As Variant)
     Dim msg As String
-    msg = tool2.AssembleComment("auto-updated to current onCore value", prevValue, currValue)
+    msg = tool2_main.AssembleComment("auto-updated to current onCore value", prevValue, currValue)
 
     With cell
         .Interior.color = fillColor
         .Value = currValue
     End With
                 
-    Call tool2.AddComment(cell, msg)
+    Call tool2_main.AddComment(cell, msg)
 
 End Sub
 
 Sub PrevInvoiceCurrOne(cell As Range, fillColor As Long, prevValue As Variant, currValue As Variant)
     Dim msg As String
-    msg = tool2.AssembleComment("auto-kept previous internal budget value", prevValue, currValue)
+    msg = tool2_main.AssembleComment("auto-kept previous internal budget value", prevValue, currValue)
     
     cell.Interior.color = fillColor
     
-    Call tool2.AddComment(cell, msg)
+    Call tool2_main.AddComment(cell, msg)
     
 End Sub
 
@@ -86,7 +125,7 @@ Function PrevXCurrY(ibCell As Range, _
     End With
     
     'check if there is a comment in visit/procedure cell
-    If tool2.IsComment(ibCell) Then
+    If tool2_main.IsComment(ibCell) Then
         cmtFlagStr = "Yes"
     Else
         cmtFlagStr = "No"
@@ -109,7 +148,7 @@ Function PrevXCurrY(ibCell As Range, _
     'Display the form modelessly
     form_amds.UserResponse = ""
     form_amds.Label1 = userFormMsg
-    Call tool2.OpenForm
+    Call tool2_main.OpenForm
 
     'Wait for the user to respond (polling loop)
     Do While form_amds.Visible
@@ -124,14 +163,14 @@ Function PrevXCurrY(ibCell As Range, _
             .Value = currValue
         End With
         
-        msg = tool2.AssembleComment("analyst updated to current onCore value", prevValue, currValue)
-        Call tool2.AddComment(ibCell, msg)
+        msg = tool2_main.AssembleComment("analyst updated to current onCore value", prevValue, currValue)
+        Call tool2_main.AddComment(ibCell, msg)
     'case_b: keep
     ElseIf form_amds.UserResponse = "keep" Then
         ibCell.Interior.color = keepFillColor
         
-        msg = tool2.AssembleComment("analyst kept previous internal budget value", prevValue, currValue)
-        Call tool2.AddComment(ibCell, msg)
+        msg = tool2_main.AssembleComment("analyst kept previous internal budget value", prevValue, currValue)
+        Call tool2_main.AddComment(ibCell, msg)
         
     'case_c: exit
     ElseIf form_amds.UserResponse = "" Then

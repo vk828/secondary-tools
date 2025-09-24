@@ -1394,7 +1394,7 @@ Sub TrimCleanNames(userRange As Range)
         'Clean formula deletes any and all of the first 32 non-printing characters in the 7-bit ASCII set (values 0 through 31)
         ' including line break (value 10) and tab (value 9)
         For Each cRange In userRange.Cells
-            cRange.Value = Trim(Application.WorksheetFunction.Clean(cRange.Value))
+            cRange.Value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cRange.Value))
 
         Next
 End Sub
