@@ -10,23 +10,23 @@ Function SelectRange(ByVal title As String, ByVal prompt As String)
 'the second action is necessary because otherwise excel seems to be confused about what
 'ActiveSheet it is on
 
-    Dim rng As Range
+    Dim Rng As Range
     
     'on Error Resume Next takes the program to the next line in case the user cancels selecting a range
     On Error Resume Next
     'get a range input from the user for Unit Rates
-    Set rng = Application.InputBox( _
+    Set Rng = Application.InputBox( _
                 title:=title, _
                 prompt:=prompt, _
                 Type:=8)
 
-    If Not (rng Is Nothing) Then
-        rng.Parent.Activate
+    If Not (Rng Is Nothing) Then
+        Rng.Parent.Activate
     End If
 
     'MsgBox prompt:="you selected " & rng.Address(external:=True)
 
-    Set SelectRange = rng
+    Set SelectRange = Rng
 
 End Function
 

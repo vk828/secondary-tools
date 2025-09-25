@@ -1,10 +1,9 @@
 Attribute VB_Name = "tool2"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 12July2025
+'Last Updated: 24September2025
 
 Option Explicit
-
 
 '*****CONSTANTS*****
 'input ranges
@@ -12,7 +11,6 @@ Option Explicit
 'data range is recalculated based on ranges provided for visit names and procedures
 'the other ranges can be put in manually or selected with an input box during program execution
 Const column_ib As Integer = 3
-Const column_onCore As Integer = column_ib + 1
 
 Const row_workbookName As Integer = 5
 Const row_sheetName As Integer = row_workbookName + 1
@@ -20,62 +18,55 @@ Const row_proceduresRange As Integer = row_workbookName + 2
 Const row_visitNamesRange As Integer = row_workbookName + 3
 Const row_dataRange As Integer = row_workbookName + 4
 
-Sub tool2_UpdateIntBdgtGridToUserDefinedGrid()
-'user clicks the button to start the program execution
-'the button may be called UPDATE INTERNAL BUDGET GRID to A GRID
-'user selects four ranges
-
-    Call UpdateIntBdgtGridToUserDefinedGrid
-    
-End Sub
-
 Sub tool2_UpdateIntBdgtGridToOncore()
-'user clicks the button to start the program execution
-'the button may be called UPDATE INTERNAL BUDGET GRID to ONCORE
-'user selects
-'  1) two ranges on the internal budget file
-'  2) billing grid file
-'  3) an arm within the billing grid file
-
-    Call tool2_oncore.UpdateIntBdgtGridToOncore
-    
-End Sub
-
-Private Sub UpdateIntBdgtGridToUserDefinedGrid()
 'main subroutine
     
     'sheet where the tool is located
     Dim toolSheet As Worksheet
     
+    'Int Bdgt ranges
     Dim ib_visitsRng As Range, ib_proceduresRng As Range, ib_gridRng As Range
+    
+    'OnCore ranges
+    Dim rngCollection As New Collection         'ranges come from function in a collection
     Dim oncore_visitsRng As Range, oncore_proceduresRng As Range, oncore_gridRng As Range
-  
-    Dim oncore_visitsArr As Variant, oncore_proceduresArr As Variant
+    
+'    'OnCore arrays used to find cell on a grid
+'    Dim oncore_visitsArr As Variant, oncore_proceduresArr As Variant
   
     'the assumption is that a user calls the program by clicking a button
     'located on the tool sheet
     Set toolSheet = ActiveSheet
     
+    'select Int Bdgt Procedures and Visits ranges and set Data range
     If Not SelectRanges(toolSheet) Then
         Exit Sub
     End If
     
-    Call AssembleSixRanges(ib_visitsRng, _
+    'set Int Bdgt ranges
+    Call AssembleIntBdgtRanges(ib_visitsRng, _
                             ib_proceduresRng, _
                             ib_gridRng, _
-                            oncore_visitsRng, _
-                            oncore_proceduresRng, _
-                            oncore_gridRng, _
                             toolSheet)
     
-    'switch to internal budget
+    'switch view to internal budget
     ib_gridRng.Worksheet.Parent.Activate
     ib_gridRng.Worksheet.Activate
+
+    'process billing grid and set OnCore ranges
+    Set rngCollection = tool2_oncore.GetOncoreRanges
     
-    oncore_visitsArr = ConvertRangeToArray(oncore_visitsRng)
-    oncore_proceduresArr = ConvertRangeToArray(oncore_proceduresRng)
+    If rngCollection.count = 0 Then Exit Sub
     
-' NOTE TO VADIM: replace oncore_visitsRng and oncore_proceduresRng with oncore_visitsArr and oncore_proceduresArr
+    Set oncore_proceduresRng = rngCollection(1)
+    Set oncore_visitsRng = rngCollection(2)
+    Set oncore_gridRng = rngCollection(3)
+        
+'    oncore_visitsArr = ConvertRangeToArray(oncore_visitsRng)
+'    oncore_proceduresArr = ConvertRangeToArray(oncore_proceduresRng)
+    
+    Call tool2_overwriteNames.OverwriteProcedureAndVisitNames(ib_proceduresRng, ib_visitsRng, _
+                                        oncore_proceduresRng, oncore_visitsRng)
     
     Call ProcessGrids(ib_visitsRng, _
                             ib_proceduresRng, _
@@ -83,29 +74,29 @@ Private Sub UpdateIntBdgtGridToUserDefinedGrid()
                             oncore_visitsRng, _
                             oncore_proceduresRng, _
                             oncore_gridRng)
-    
+
 End Sub
 
-Private Function ConvertRangeToArray(rng) As Variant
+Private Function ConvertRangeToArray(Rng) As Variant
 
     Dim arr() As Variant
-    arr = rng.Value
+    arr = Rng.Value
     
-    Dim rows As Long, cols As Long
-    Dim row As Long, col As Long
-
-    rows = UBound(arr, 1) - LBound(arr, 1) + 1  ' Number of rows
-    cols = UBound(arr, 2) - LBound(arr, 2) + 1  ' Number of columns
-
-    'iterate through columns and clean up the names
-    For col = 1 To cols
-        arr(1, col) = Left(Trim(Application.WorksheetFunction.Clean(CStr(arr(1, col)))), 255)
-    Next col
-
-    'iterate through rows and clean up the names
-    For row = 1 To rows
-        arr(row, 1) = Left(Trim(Application.WorksheetFunction.Clean(CStr(arr(row, 1)))), 255)
-    Next row
+'    Dim rows As Long, cols As Long
+'    Dim row As Long, col As Long
+'
+'    rows = UBound(arr, 1) - LBound(arr, 1) + 1  ' Number of rows
+'    cols = UBound(arr, 2) - LBound(arr, 2) + 1  ' Number of columns
+'
+'    'iterate through columns and clean up the names
+'    For col = 1 To cols
+'        arr(1, col) = Left(Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(CStr(arr(1, col)))), 255)
+'    Next col
+'
+'    'iterate through rows and clean up the names
+'    For row = 1 To rows
+'        arr(row, 1) = Left(Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(CStr(arr(row, 1)))), 255)
+'    Next row
 
     ConvertRangeToArray = arr
 
@@ -117,7 +108,8 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
                             oncore_visitsRng As Range, _
                             oncore_proceduresRng As Range, _
                             oncore_gridRng As Range)
-    
+'subroutine to process grids; takes three ranges from Int Bdgt and three from OnCore
+
     Dim dateStampStr As String
     Dim msg As String
     dateStampStr = "[" & Format(Date, "ddmmmyy") & " tool2 execution] "
@@ -155,7 +147,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
     For ib_currRow = 1 To ib_rows
         
         'procedure name from internal budget
-        procedureName = ib_proceduresRng.Cells(ib_currRow, 1).Value
+        procedureName = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(ib_proceduresRng.Cells(ib_currRow, 1).Value))
         
         'find row where the internal budget procedure is located on oncore document
         'if not found, Application.Match returns CVErr
@@ -163,9 +155,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
         
         'if procedure is not found
         If IsError(oncore_currRow) Then
-            ib_proceduresRng.Cells(ib_currRow, 1).Interior.color = fillColor_differentFromOncore
-            Call AddComment(ib_proceduresRng.Cells(ib_currRow, 1), dateStampStr & "procedure not found in OnCore; row skipped")
-            
+            Call tool2_cases.ProcedureNotFound(ib_proceduresRng.Cells(ib_currRow, 1), ib_gridRng.rows(ib_currRow), fillColor_differentFromOncore)
             GoTo nextProcedure
         End If
         
@@ -173,7 +163,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
         For ib_currColumn = 1 To ib_columns
             
             'visit name from internal budget
-            visitName = ib_visitsRng.Cells(1, ib_currColumn).Value
+            visitName = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(ib_visitsRng.Cells(1, ib_currColumn).Value))
             
             'find column where the internal budget visit is located on oncore document
             'if not found, Application.Match returns CVErr
@@ -182,11 +172,9 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
             'if visit is not found
             If IsError(oncore_currColumn) Then
                 
-                ib_visitsRng.Cells(1, ib_currColumn).Interior.color = fillColor_differentFromOncore
-
-                'comment is added only one time
+                'process this one time per visit ONLY
                 If visitNotFoundArray(ib_currColumn) = False Then
-                    Call AddComment(ib_visitsRng.Cells(1, ib_currColumn), dateStampStr & "visit not found in OnCore; column skipped")
+                    Call tool2_cases.VisitNotFound(ib_visitsRng.Cells(1, ib_currColumn), ib_gridRng.Columns(ib_currColumn), fillColor_differentFromOncore)
                     visitNotFoundArray(ib_currColumn) = True
                 End If
                 
@@ -211,7 +199,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
 
                 Call tool2_cases.PrevNothingCurrX(ib_gridRng.Cells(ib_currRow, ib_currColumn), fillColor_updatedToOncore, ib_value, oncore_value)
 
-            'case4 - ib = "inv" and oncore = number
+            'case4 - ib = "inv" and oncore = 1
             ElseIf isPrevInvoiceCurrOne(ib_value, oncore_value) Then
 
                 Call tool2_cases.PrevInvoiceCurrOne(ib_gridRng.Cells(ib_currRow, ib_currColumn), fillColor_sameValue, ib_value, oncore_value)
@@ -239,59 +227,12 @@ nextProcedure:
         
 Call Done
 
-
-'    Application.ScreenUpdating = False
-'    Application.Calculation = xlCalculationManual
-'
-'
-'    Application.Calculation = xlCalculationAutomatic
-'    Application.ScreenUpdating = True
-
-End Sub
-
-Function IsComment(rng As Range)
-'function that returns true/false telling the user if there is comment in a cell
-    
-    Dim cmt As CommentThreaded
-    
-    Set cmt = rng.CommentThreaded
-    
-    If cmt Is Nothing Then
-        IsComment = False
-    Else
-        IsComment = True
-    End If
-
-End Function
-
-Sub OpenForm()
-'opens user form at a specified location on the screen
-
-    With form_amds
-        'manual positioning
-        .StartUpPosition = 0
-        
-        'set left and top location
-        'currently set to bottom right of excel app
-        .Left = Application.Left + (1 * Application.Width) - (1 * .Width)
-        .Top = Application.Top + (1 * Application.Height) - (1 * .Height)
-        
-        'open in modless mode
-        .Show vbModeless
-    End With
-
 End Sub
 
 Private Sub Done()
 'shows message that the program is done
 
 MsgBox ("Tool2 finished updating the grid.")
-
-End Sub
-
-Private Sub UpdateIntBdgtGridToOncore()
-'main subroutine
-
 
 End Sub
 
@@ -303,14 +244,7 @@ Private Function SelectRanges(toolSheet As Worksheet) As Boolean
         SelectRanges = False
         Exit Function
     End If
-    
-    'OnCore Related - select two ranges and set data range
-    'if data range can't be set, execution stops
-    If Not SelectTwoRangesAndSetDataRange(column_onCore, "OnCore", toolSheet) Then
-        SelectRanges = False
-        Exit Function
-    End If
-    
+
     SelectRanges = True
 
 End Function
@@ -328,22 +262,14 @@ Private Function SelectIntBdgtRanges(toolSheet As Worksheet) As Boolean
 
 End Function
 
-Private Function AssembleSixRanges(ByRef ib_visits_rng As Range, _
+Private Function AssembleIntBdgtRanges(ByRef ib_visits_rng As Range, _
                                     ByRef ib_procedures_rng As Range, _
                                     ByRef ib_grid_rng As Range, _
-                                    ByRef oncore_visits_rng As Range, _
-                                    ByRef oncore_procedures_rng As Range, _
-                                    ByRef oncore_grid_rng As Range, _
                                     toolSheet As Worksheet)
 
-    Set ib_visits_rng = AssembleRangeComponentsToRange(column_ib, row_workbookName, row_sheetName, row_visitNamesRange, toolSheet)
-    Set ib_procedures_rng = AssembleRangeComponentsToRange(column_ib, row_workbookName, row_sheetName, row_proceduresRange, toolSheet)
-    Set ib_grid_rng = AssembleRangeComponentsToRange(column_ib, row_workbookName, row_sheetName, row_dataRange, toolSheet)
-    
-    
-    Set oncore_visits_rng = AssembleRangeComponentsToRange(column_onCore, row_workbookName, row_sheetName, row_visitNamesRange, toolSheet)
-    Set oncore_procedures_rng = AssembleRangeComponentsToRange(column_onCore, row_workbookName, row_sheetName, row_proceduresRange, toolSheet)
-    Set oncore_grid_rng = AssembleRangeComponentsToRange(column_onCore, row_workbookName, row_sheetName, row_dataRange, toolSheet)
+    Set ib_visits_rng = Utilities.AssembleRangeComponentsToRange(column_ib, row_workbookName, row_sheetName, row_visitNamesRange, toolSheet)
+    Set ib_procedures_rng = Utilities.AssembleRangeComponentsToRange(column_ib, row_workbookName, row_sheetName, row_proceduresRange, toolSheet)
+    Set ib_grid_rng = Utilities.AssembleRangeComponentsToRange(column_ib, row_workbookName, row_sheetName, row_dataRange, toolSheet)
 
 End Function
 
@@ -430,48 +356,6 @@ Private Sub SelectProceduresAndVisitNamesRanges(column_allComponents As Integer,
 
 End Sub
  
-Private Sub ConvertNoteToComment(cell As Range)
-    
-    Dim commentText As String
-    
-    If Not cell.comment Is Nothing Then
-        commentText = cell.comment.Text
-        cell.comment.Delete
-        cell.AddCommentThreaded ("[previous note]" & commentText)
-    End If
-    
-End Sub
-
-Function AssembleComment(middleStr As String, prev As Variant, curr As Variant) As String
-    Dim startStr As String
-    Dim endStr As String
-    
-    If prev = "" Then prev = "[empty]"
-    If curr = "" Then curr = "[empty]"
-    
-    startStr = "[" & Format(Date, "ddmmmyy") & " tool2 execution] "
-
-    endStr = Chr(10) & _
-            " -prev int bdgt value: " & CStr(prev) & Chr(10) & _
-            " -curr onCore value: " & CStr(curr)
-    AssembleComment = startStr & middleStr & endStr
-
-End Function
-
-Sub AddComment(cell As Range, commentText As String)
-    'if there is a note, convert it to comment
-    Call ConvertNoteToComment(cell)
-    
-    'add comment
-    With cell
-        If .CommentThreaded Is Nothing Then
-            .AddCommentThreaded (commentText)
-        Else
-            .CommentThreaded.AddReply (commentText)
-        End If
-    End With
-End Sub
-
 Private Function isPrevInvoiceCurrOne(prev As Variant, curr As Variant) As Boolean
 
     If StrComp(CStr(prev), "inv", vbTextCompare) = 0 And IsNumeric(curr) Then
@@ -485,5 +369,3 @@ Private Function isPrevInvoiceCurrOne(prev As Variant, curr As Variant) As Boole
     End If
 
 End Function
-
-

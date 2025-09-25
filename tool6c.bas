@@ -170,19 +170,19 @@ Private Function AdjustProceduresAndVisitsRanges(rawRange() As Range) As Range()
     AdjustProceduresAndVisitsRanges = outputRange
 End Function
 
-Private Function SetValuesRange(rng() As Range) As Range
+Private Function SetValuesRange(Rng() As Range) As Range
 'this function sets a range by intersecting input ranges
 'return the resulting range
     
     Dim outputRange As Range
     Dim topRow, bottomRow, leftColumn, rightColumn As Long
     
-    With rng(0)
+    With Rng(0)
         topRow = .rows(1).row
         bottomRow = .rows(.rows.count).row
     End With
     
-    With rng(1)
+    With Rng(1)
         leftColumn = .Columns(1).column
         rightColumn = .Columns(.Columns.count).column
         

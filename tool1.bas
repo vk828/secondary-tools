@@ -551,7 +551,7 @@ End Sub
 Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As Integer, visitNameRow As Integer, armFirstVisitColumn As Integer, armLastVisitColumn As Integer, _
                         checkbox_removeFootnotes As Boolean)
                         
-    Dim rng As Range
+    Dim Rng As Range
     Dim numberOfVisits As Integer
     Dim i As Integer    ' used to iterate through arrays
     Dim pos As Integer  ' used to position of find chr(10)
@@ -564,7 +564,7 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     ReDim synkVisitNamesArray(1 To numberOfVisits) As String
 
     With curSheet
-        Set rng = .Range(.Cells(synkRow, armFirstVisitColumn), .Cells(synkRow, armLastVisitColumn))
+        Set Rng = .Range(.Cells(synkRow, armFirstVisitColumn), .Cells(synkRow, armLastVisitColumn))
     End With
     
     'STEP 1 - prepare segment names
@@ -572,12 +572,12 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     With curSheet
         curSheet.Range(.Cells(visitNameRow - 1, armFirstVisitColumn), .Cells(visitNameRow - 1, armLastVisitColumn)).Copy
     End With
-    rng.PasteSpecial xlPasteAllExceptBorders
+    Rng.PasteSpecial xlPasteAllExceptBorders
     Application.CutCopyMode = False 'empties clipboard after copying
     'remove footnotes
-    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
     'copy segment names into array
-    segmentNamesArray = rng.Value
+    segmentNamesArray = Rng.Value
     
     For i = 1 To numberOfVisits
         
@@ -600,12 +600,12 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     With curSheet
         .Range(.Cells(visitNameRow, armFirstVisitColumn), .Cells(visitNameRow, armLastVisitColumn)).Copy
     End With
-    rng.PasteSpecial xlPasteAllExceptBorders
+    Rng.PasteSpecial xlPasteAllExceptBorders
     Application.CutCopyMode = False 'empties clipboard after copying
     'remove footnotes
-    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
     'copy segment names into array
-    visitNamesArray = rng.Value
+    visitNamesArray = Rng.Value
             
     'STEP 3 - prepare synk visit names
     For i = 1 To numberOfVisits
@@ -616,10 +616,10 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
         
     'STEP 4 - write to rng
     
-    rng.Value = synkVisitNamesArray
+    Rng.Value = synkVisitNamesArray
    
     'STEP 5 - add borders for each arm
-    With rng
+    With Rng
         .Interior.color = RGB(198, 224, 180)
         
         With .Borders(xlEdgeLeft)

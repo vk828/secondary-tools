@@ -3,6 +3,7 @@ Attribute VB_Name = "tool2_oncore"
 'Last Updated: September 2025
 
 Option Explicit
+Option Private Module
 
 Function GetOncoreRanges() As Collection
     Dim wbOncore As Workbook
@@ -57,7 +58,13 @@ Function GetOncoreRanges() As Collection
     lastProcedureRow = RemoveRows(wsOncore, firstProcedureRow, procedureNamesCol)
 
     'STEP4: remove footnotes and update visit names
-    uniqueVisitNamesRow = UpdateVisitNames(wsOncore, firstVisitCol, lastVisitCol, segmentNamesRow, visitNamesRow)
+    
+    'if sheet was already processed, skip UpdateVisitNames
+    If wsOncore.Cells(firstProcedureRow, procedureNamesCol) = "" Then
+        uniqueVisitNamesRow = firstProcedureRow
+    Else
+        uniqueVisitNamesRow = UpdateVisitNames(wsOncore, firstVisitCol, lastVisitCol, segmentNamesRow, visitNamesRow)
+    End If
     
     'adjust procedure row numbers as needed
     If uniqueVisitNamesRow <> visitNamesRow Then
@@ -74,7 +81,7 @@ Function GetOncoreRanges() As Collection
     Call UpdateGrid(wsOncore, firstProcedureRow, lastProcedureRow, firstVisitCol, lastVisitCol)
     
     Call OptimizeEnd
-    
+
     'STEP7: return three objects
     rngCollection.Add GetRngObj(wsOncore, firstProcedureRow, lastProcedureRow, procedureNamesCol, procedureNamesCol)
     rngCollection.Add GetRngObj(wsOncore, uniqueVisitNamesRow, uniqueVisitNamesRow, firstVisitCol, lastVisitCol)
@@ -96,17 +103,17 @@ Private Sub UpdateGrid(ws As Worksheet, _
                         firstRow As Integer, lastRow As Integer, _
                         firstCol As Integer, lastCol As Integer)
 
-    Dim rng As Range
+    Dim Rng As Range
     Dim cell As Range
 
     With ws
-        Set rng = .Range(.Cells(firstRow, firstCol), .Cells(lastRow, lastCol))
+        Set Rng = .Range(.Cells(firstRow, firstCol), .Cells(lastRow, lastCol))
     End With
     
     'remove footnotes from grid
-    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
     
-    Call UpdateCAToIntBdgtGrid(rng, rng)
+    Call UpdateCAToIntBdgtGrid(Rng, Rng)
 
 End Sub
 
@@ -179,17 +186,17 @@ End Sub
 
 Private Sub UpdateProcedureNames(ws As Worksheet, firstRow As Integer, lastRow As Integer, col As Integer)
 
-    Dim rng As Range
+    Dim Rng As Range
     Dim cell As Range
 
     With ws
-        Set rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
+        Set Rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
     End With
     
     'remove footnotes from procedures names
-    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
     
-    For Each cell In rng
+    For Each cell In Rng
         cell.Value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
     Next cell
 
@@ -224,7 +231,7 @@ Private Function UpdateVisitNames(ws As Worksheet, _
 
     Dim uniqueNamesRow As Integer
 
-    Dim rng As Range
+    Dim Rng As Range
     Dim cell As Range
     Dim prevSegmentName As String
     Dim curSegmentName As String
@@ -236,15 +243,15 @@ Private Function UpdateVisitNames(ws As Worksheet, _
     
     'remove footnotes and unmerge segment names
     With ws
-        Set rng = .Range(.Cells(segmentNamesRow, firstCol), .Cells(segmentNamesRow, lastCol))
+        Set Rng = .Range(.Cells(segmentNamesRow, firstCol), .Cells(segmentNamesRow, lastCol))
     End With
     
-    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
-    rng.UnMerge
+    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
+    Rng.UnMerge
     
     'add missing segment names
-    prevSegmentName = rng.Cells(1).Value
-    For Each cell In rng
+    prevSegmentName = Rng.Cells(1).Value
+    For Each cell In Rng
         curSegmentName = cell.Value
         If curSegmentName = "" Then
             cell.Value = prevSegmentName
@@ -255,10 +262,10 @@ Private Function UpdateVisitNames(ws As Worksheet, _
     
     'remove footnotes from visit names
     With ws
-        Set rng = .Range(.Cells(visitNamesRow, firstCol), .Cells(visitNamesRow, lastCol))
+        Set Rng = .Range(.Cells(visitNamesRow, firstCol), .Cells(visitNamesRow, lastCol))
     End With
     
-    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
     
     'insert row for unique names
     ws.Cells(uniqueNamesRow, firstCol).EntireRow.Insert
@@ -299,21 +306,21 @@ Private Function RemoveRows(ws As Worksheet, firstRow, col) As Integer
     Dim startOfRemovedRows As Variant
     Dim cell As Range
     Dim curProcedureName As String
-    Dim rng As Range
+    Dim Rng As Range
     Dim i, j As Integer
     
     startOfRemovedRows = Array("-", "(INV)")
     
     With ws
         lastRow = .Cells(.rows.count, col).End(xlUp).row
-        Set rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
+        Set Rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
     End With
         
-    For j = rng.Cells.count To 1 Step -1
-        curProcedureName = Trim(Application.WorksheetFunction.Clean(rng.Cells(j).Value))
+    For j = Rng.Cells.count To 1 Step -1
+        curProcedureName = Trim(Application.WorksheetFunction.Clean(Rng.Cells(j).Value))
         For i = LBound(startOfRemovedRows) To UBound(startOfRemovedRows)
             If InStr(1, curProcedureName, startOfRemovedRows(i)) = 1 Then
-                rng.Cells(j).EntireRow.Delete
+                Rng.Cells(j).EntireRow.Delete
                 lastRow = lastRow - 1
                 Exit For
             End If
