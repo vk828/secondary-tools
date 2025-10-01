@@ -138,9 +138,9 @@ Private Sub GenerateAndFillVerticalLookupFormulas(ByVal sourceProceduresRng As R
     
 End Sub
 
-Private Sub AddColorToRange(Rng As Range, colorCode As Long)
+Private Sub AddColorToRange(rng As Range, colorCode As Long)
 'this subroutine sets a specified background color to a range
 
-    Rng.Interior.color = colorCode
+    rng.Interior.color = colorCode
 End Sub
 

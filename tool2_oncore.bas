@@ -5,7 +5,7 @@ Attribute VB_Name = "tool2_oncore"
 Option Explicit
 Option Private Module
 
-Function GetOncoreRanges() As Collection
+Function GetOncoreRanges(ibSheetName As String) As Collection
     Dim wbOncore As Workbook
     Dim wsOncoreName As String
     Dim wsOncore As Worksheet
@@ -30,9 +30,9 @@ Function GetOncoreRanges() As Collection
     
     'STEP2: choose arm
     'Billing Grid worksheet NAME to be used to process this amendment
-    wsOncoreName = ChooseArm
+    wsOncoreName = ChooseArm(ibSheetName)
     
-    'exit Sub and close Billing Grid if user clicks Abort
+    'exit Sub and close Billing Grid if user clicks 'Exit'
     If wsOncoreName = "" Then
         wbOncore.Close
         Exit Function
@@ -103,17 +103,17 @@ Private Sub UpdateGrid(ws As Worksheet, _
                         firstRow As Integer, lastRow As Integer, _
                         firstCol As Integer, lastCol As Integer)
 
-    Dim Rng As Range
+    Dim rng As Range
     Dim cell As Range
 
     With ws
-        Set Rng = .Range(.Cells(firstRow, firstCol), .Cells(lastRow, lastCol))
+        Set rng = .Range(.Cells(firstRow, firstCol), .Cells(lastRow, lastCol))
     End With
     
     'remove footnotes from grid
-    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     
-    Call UpdateCAToIntBdgtGrid(Rng, Rng)
+    Call UpdateCAToIntBdgtGrid(rng, rng)
 
 End Sub
 
@@ -186,17 +186,17 @@ End Sub
 
 Private Sub UpdateProcedureNames(ws As Worksheet, firstRow As Integer, lastRow As Integer, col As Integer)
 
-    Dim Rng As Range
+    Dim rng As Range
     Dim cell As Range
 
     With ws
-        Set Rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
+        Set rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
     End With
     
     'remove footnotes from procedures names
-    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     
-    For Each cell In Rng
+    For Each cell In rng
         cell.Value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
     Next cell
 
@@ -231,7 +231,7 @@ Private Function UpdateVisitNames(ws As Worksheet, _
 
     Dim uniqueNamesRow As Integer
 
-    Dim Rng As Range
+    Dim rng As Range
     Dim cell As Range
     Dim prevSegmentName As String
     Dim curSegmentName As String
@@ -243,15 +243,15 @@ Private Function UpdateVisitNames(ws As Worksheet, _
     
     'remove footnotes and unmerge segment names
     With ws
-        Set Rng = .Range(.Cells(segmentNamesRow, firstCol), .Cells(segmentNamesRow, lastCol))
+        Set rng = .Range(.Cells(segmentNamesRow, firstCol), .Cells(segmentNamesRow, lastCol))
     End With
     
-    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
-    Rng.UnMerge
+    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
+    rng.UnMerge
     
     'add missing segment names
-    prevSegmentName = Rng.Cells(1).Value
-    For Each cell In Rng
+    prevSegmentName = rng.Cells(1).Value
+    For Each cell In rng
         curSegmentName = cell.Value
         If curSegmentName = "" Then
             cell.Value = prevSegmentName
@@ -262,10 +262,10 @@ Private Function UpdateVisitNames(ws As Worksheet, _
     
     'remove footnotes from visit names
     With ws
-        Set Rng = .Range(.Cells(visitNamesRow, firstCol), .Cells(visitNamesRow, lastCol))
+        Set rng = .Range(.Cells(visitNamesRow, firstCol), .Cells(visitNamesRow, lastCol))
     End With
     
-    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     
     'insert row for unique names
     ws.Cells(uniqueNamesRow, firstCol).EntireRow.Insert
@@ -306,21 +306,21 @@ Private Function RemoveRows(ws As Worksheet, firstRow, col) As Integer
     Dim startOfRemovedRows As Variant
     Dim cell As Range
     Dim curProcedureName As String
-    Dim Rng As Range
+    Dim rng As Range
     Dim i, j As Integer
     
     startOfRemovedRows = Array("-", "(INV)")
     
     With ws
         lastRow = .Cells(.rows.count, col).End(xlUp).row
-        Set Rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
+        Set rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
     End With
         
-    For j = Rng.Cells.count To 1 Step -1
-        curProcedureName = Trim(Application.WorksheetFunction.Clean(Rng.Cells(j).Value))
+    For j = rng.Cells.count To 1 Step -1
+        curProcedureName = Trim(Application.WorksheetFunction.Clean(rng.Cells(j).Value))
         For i = LBound(startOfRemovedRows) To UBound(startOfRemovedRows)
             If InStr(1, curProcedureName, startOfRemovedRows(i)) = 1 Then
-                Rng.Cells(j).EntireRow.Delete
+                rng.Cells(j).EntireRow.Delete
                 lastRow = lastRow - 1
                 Exit For
             End If
@@ -331,11 +331,14 @@ Private Function RemoveRows(ws As Worksheet, firstRow, col) As Integer
     
 End Function
 
-Private Function ChooseArm()
+Private Function ChooseArm(name As String) As String
+'function opens a user form and let's the user pick a billing grid arm
+'it returns the arm name; if user clicks 'Exit' or 'X', the return is "" (empty string)
     
     Dim uf As New frmTool2ChooseArm
+    uf.DetailInstructions (name)
     uf.Show
-
+    
     ChooseArm = uf.SelectedSheet
     Unload uf
 

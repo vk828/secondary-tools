@@ -37,9 +37,9 @@ Sub PrevAndCurrEqualNothing(cell As Range, fillColor As Long)
     cell.Interior.color = fillColor
 End Sub
 
-Function AreAllCellsEmpty(Rng As Range) As Boolean
+Function AreAllCellsEmpty(rng As Range) As Boolean
     Dim cell As Range
-    For Each cell In Rng.Cells
+    For Each cell In rng.Cells
         If CStr(cell.Value) <> "" Then
             AreAllCellsEmpty = False
             Exit Function
@@ -94,8 +94,8 @@ Function PrevXCurrY(ibCell As Range, _
     Dim msg As String
 
     'get sheet names
-    oncore_sheetName = oncoreCell.Worksheet.Name
-    ib_sheetName = ibCell.Worksheet.Name
+    oncore_sheetName = oncoreCell.Worksheet.name
+    ib_sheetName = ibCell.Worksheet.name
     
     'adjust ib and oncore values for readibility
     If CStr(prevValue) = "" Then
@@ -183,12 +183,12 @@ Function PrevXCurrY(ibCell As Range, _
     
 End Function
 
-Function IsComment(Rng As Range)
+Function IsComment(rng As Range)
 'function that returns true/false telling the user if there is comment in a cell
     
     Dim cmt As CommentThreaded
     
-    Set cmt = Rng.CommentThreaded
+    Set cmt = rng.CommentThreaded
     
     If cmt Is Nothing Then
         IsComment = False

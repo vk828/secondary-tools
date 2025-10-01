@@ -453,14 +453,14 @@ Sub SaveWB(destinationSheet As Worksheet, sourceSheet As Worksheet, destinationR
     'make all font size on the sheet uniform
     destinationSheet.Cells.Font.Size = 11
     
-    If InStr(1, destinationSheet.Name, "internal budget grid", vbTextCompare) > 0 Then
+    If InStr(1, destinationSheet.name, "internal budget grid", vbTextCompare) > 0 Then
         fileName = "Internal Budget Grid_" & ProtocolNo & "_" & PI & "_" & ShortTitle & "_" & Sponsor & "_" & "PAv" & CalendarVersion & "_" & Today
     Else
         fileName = "CA_" & ProtocolNo & "_" & PI & "_" & ShortTitle & "_" & Sponsor & "_" & "PAv" & CalendarVersion & "_" & Today
     End If
     
     fileName = CleanString(fileName)
-    fileNameBG = ActiveWorkbook.Name
+    fileNameBG = ActiveWorkbook.name
     
     On Error GoTo SkipSave
         'Save the file
@@ -497,7 +497,7 @@ Sub CopyRenameSheet(sourceSheet As Worksheet, destinationPlace As Worksheet, ren
 'this subroutine copies a sheet to a workbook and renames it
 
     sourceSheet.Copy Before:=destinationPlace
-    destinationPlace.Parent.Worksheets(sourceSheet.Name).Name = renamedSheetName
+    destinationPlace.Parent.Worksheets(sourceSheet.name).name = renamedSheetName
 
 
 End Sub
@@ -551,7 +551,7 @@ End Sub
 Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As Integer, visitNameRow As Integer, armFirstVisitColumn As Integer, armLastVisitColumn As Integer, _
                         checkbox_removeFootnotes As Boolean)
                         
-    Dim Rng As Range
+    Dim rng As Range
     Dim numberOfVisits As Integer
     Dim i As Integer    ' used to iterate through arrays
     Dim pos As Integer  ' used to position of find chr(10)
@@ -564,7 +564,7 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     ReDim synkVisitNamesArray(1 To numberOfVisits) As String
 
     With curSheet
-        Set Rng = .Range(.Cells(synkRow, armFirstVisitColumn), .Cells(synkRow, armLastVisitColumn))
+        Set rng = .Range(.Cells(synkRow, armFirstVisitColumn), .Cells(synkRow, armLastVisitColumn))
     End With
     
     'STEP 1 - prepare segment names
@@ -572,12 +572,12 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     With curSheet
         curSheet.Range(.Cells(visitNameRow - 1, armFirstVisitColumn), .Cells(visitNameRow - 1, armLastVisitColumn)).Copy
     End With
-    Rng.PasteSpecial xlPasteAllExceptBorders
+    rng.PasteSpecial xlPasteAllExceptBorders
     Application.CutCopyMode = False 'empties clipboard after copying
     'remove footnotes
-    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     'copy segment names into array
-    segmentNamesArray = Rng.Value
+    segmentNamesArray = rng.Value
     
     For i = 1 To numberOfVisits
         
@@ -600,12 +600,12 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     With curSheet
         .Range(.Cells(visitNameRow, armFirstVisitColumn), .Cells(visitNameRow, armLastVisitColumn)).Copy
     End With
-    Rng.PasteSpecial xlPasteAllExceptBorders
+    rng.PasteSpecial xlPasteAllExceptBorders
     Application.CutCopyMode = False 'empties clipboard after copying
     'remove footnotes
-    Call Utilities.RemoveFootnotesFromSelectedRange(Rng)
+    Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     'copy segment names into array
-    visitNamesArray = Rng.Value
+    visitNamesArray = rng.Value
             
     'STEP 3 - prepare synk visit names
     For i = 1 To numberOfVisits
@@ -616,10 +616,10 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
         
     'STEP 4 - write to rng
     
-    Rng.Value = synkVisitNamesArray
+    rng.Value = synkVisitNamesArray
    
     'STEP 5 - add borders for each arm
-    With Rng
+    With rng
         .Interior.color = RGB(198, 224, 180)
         
         With .Borders(xlEdgeLeft)
@@ -1166,18 +1166,18 @@ Sub BillingGridToCAFileConverter(ByRef designationsArray() As String, _
         wb.Sheets(i).Activate
         Set curSheet = ActiveWorkbook.Worksheets(i)
         
-        If curSheet.Name Like renamedTemplateSheetName _
-                        Or curSheet.Name Like "Protocol Information" _
-                        Or curSheet.Name Like "Billing Designation Legend" _
-                        Or curSheet.Name Like footnoteLegendSheetName _
-                        Or curSheet.Name Like "QCT Checklist" _
-                        Or LCase(curSheet.Name) Like LCase("*CA_generated*") _
-                        Or LCase(curSheet.Name) Like LCase("*Internal Budget Grid*") Then
+        If curSheet.name Like renamedTemplateSheetName _
+                        Or curSheet.name Like "Protocol Information" _
+                        Or curSheet.name Like "Billing Designation Legend" _
+                        Or curSheet.name Like footnoteLegendSheetName _
+                        Or curSheet.name Like "QCT Checklist" _
+                        Or LCase(curSheet.name) Like LCase("*CA_generated*") _
+                        Or LCase(curSheet.name) Like LCase("*Internal Budget Grid*") Then
             GoTo NextIteration
         End If
         
         armCounter = armCounter + 1
-        curSheetName = curSheet.Name
+        curSheetName = curSheet.name
 
         'original billing grid file
         'lastCol and lastRow of an arm based on 1st row and 1st column
@@ -1409,7 +1409,7 @@ sheetName = LCase(sheetName)
 
 For Each curSheet In Worksheets
             
-    If LCase(curSheet.Name) = sheetName Then
+    If LCase(curSheet.name) = sheetName Then
         IsSheetFound = True
         Exit Function
     End If

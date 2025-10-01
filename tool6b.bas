@@ -75,14 +75,14 @@ Sub tool6b_AddHorizLookupFormulas()
     
     'STEP 4 - generate and show the message to user
     outputMsg = "You've added lookup formulas TO:" & Chr(10) & _
-                "  -workbook:  " & destinationVisitsRng.Parent.Parent.Name & Chr(10) & _
-                "  -sheet:  " & destinationVisitsRng.Parent.Name & Chr(10) & _
+                "  -workbook:  " & destinationVisitsRng.Parent.Parent.name & Chr(10) & _
+                "  -sheet:  " & destinationVisitsRng.Parent.name & Chr(10) & _
                 "  -lookup visits range:  " & destinationVisitsRng.Address(False, False) & Chr(10) & _
                 "  -lookup formulas range:  " & destinationValuesRng.Address(False, False) & Chr(10) & _
                 Chr(10) & _
                 "FROM:" & Chr(10) & _
-                "  -source workbook:  " & sourceVisitsRng.Parent.Parent.Name & Chr(10) & _
-                "  -source sheet:  " & sourceVisitsRng.Parent.Name & Chr(10) & _
+                "  -source workbook:  " & sourceVisitsRng.Parent.Parent.name & Chr(10) & _
+                "  -source sheet:  " & sourceVisitsRng.Parent.name & Chr(10) & _
                 "  -source visits range:  " & sourceVisitsRng.Address(False, False) & Chr(10) & _
                 "  -source values range:  " & sourceValuesRng.Address(False, False) & "."
 
@@ -124,10 +124,10 @@ Private Function SelectVisitsAndValuesRanges(ByVal titleFirstSelection As String
         End If
         
         'stop looping if workbooks or sheets don't match
-        If returnArray(0).Parent.Parent.Name <> returnArray(1).Parent.Parent.Name Then
+        If returnArray(0).Parent.Parent.name <> returnArray(1).Parent.Parent.name Then
             MsgBox ("Visits and Values ranges must be part of the same workbook and " _
                     & "sheet. You selected two different workbooks. Please try again.")
-        ElseIf returnArray(0).Parent.Name <> returnArray(1).Parent.Name Then
+        ElseIf returnArray(0).Parent.name <> returnArray(1).Parent.name Then
             MsgBox ("Visits and Values ranges must be part of the same workbook and " _
                     & "sheet. You selected two different sheets. Please try again.")
         Else

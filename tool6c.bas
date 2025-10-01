@@ -91,15 +91,15 @@ Sub tool6c_AddTwoDimensionalLookupFormulas()
     'STEP 6 - generate and show the message to user
     
     outputMsg = "You've added lookup formulas TO:" & Chr(10) & _
-                "  -workbook:  " & destinationProceduresRng.Parent.Parent.Name & Chr(10) & _
-                "  -sheet:  " & destinationProceduresRng.Parent.Name & Chr(10) & _
+                "  -workbook:  " & destinationProceduresRng.Parent.Parent.name & Chr(10) & _
+                "  -sheet:  " & destinationProceduresRng.Parent.name & Chr(10) & _
                 "  -lookup procedures range:  " & destinationProceduresRng.Address(False, False) & Chr(10) & _
                 "  -lookup visits range:  " & destinationVisitsRng.Address(False, False) & Chr(10) & _
                 "  -lookup formulas range:  " & destinationValuesRng.Address(False, False) & Chr(10) & _
                 Chr(10) & _
                 "FROM:" & Chr(10) & _
-                "  -source workbook:  " & sourceProceduresRng.Parent.Parent.Name & Chr(10) & _
-                "  -source sheet:  " & sourceProceduresRng.Parent.Name & Chr(10) & _
+                "  -source workbook:  " & sourceProceduresRng.Parent.Parent.name & Chr(10) & _
+                "  -source sheet:  " & sourceProceduresRng.Parent.name & Chr(10) & _
                 "  -source procedures range:  " & sourceProceduresRng.Address(False, False) & Chr(10) & _
                 "  -source visits range:  " & sourceVisitsRng.Address(False, False) & Chr(10) & _
                 "  -source values range:  " & sourceValuesRng.Address(False, False) & "."
@@ -142,10 +142,10 @@ Private Function SelectProceduresAndVisitsRanges(ByVal titleFirstSelection As St
         End If
         
         'stop looping if workbooks or sheets don't match
-        If returnArray(0).Parent.Parent.Name <> returnArray(1).Parent.Parent.Name Then
+        If returnArray(0).Parent.Parent.name <> returnArray(1).Parent.Parent.name Then
             MsgBox ("Procedures and Visits ranges must be part of the same workbook and " _
                     & "sheet. You selected two different workbooks. Please try again.")
-        ElseIf returnArray(0).Parent.Name <> returnArray(1).Parent.Name Then
+        ElseIf returnArray(0).Parent.name <> returnArray(1).Parent.name Then
             MsgBox ("Procedures and Visits ranges must be part of the same workbook and " _
                     & "sheet. You selected two different sheets. Please try again.")
         Else
@@ -170,19 +170,19 @@ Private Function AdjustProceduresAndVisitsRanges(rawRange() As Range) As Range()
     AdjustProceduresAndVisitsRanges = outputRange
 End Function
 
-Private Function SetValuesRange(Rng() As Range) As Range
+Private Function SetValuesRange(rng() As Range) As Range
 'this function sets a range by intersecting input ranges
 'return the resulting range
     
     Dim outputRange As Range
     Dim topRow, bottomRow, leftColumn, rightColumn As Long
     
-    With Rng(0)
+    With rng(0)
         topRow = .rows(1).row
         bottomRow = .rows(.rows.count).row
     End With
     
-    With Rng(1)
+    With rng(1)
         leftColumn = .Columns(1).column
         rightColumn = .Columns(.Columns.count).column
         

@@ -5,21 +5,21 @@ Option Explicit
 Sub tool10_RemoveReplyFromThreadedCommentByText()
 
 '    Dim ws As Worksheet
-    Dim Rng As Range
+    Dim rng As Range
     Dim cell As Range
     Dim threadedComment As CommentThreaded
     Dim reply As CommentThreaded
     Dim searchText As String
     Dim i As Long
 
-    Set Rng = SelectRange
-    If Rng Is Nothing Then Exit Sub
+    Set rng = SelectRange
+    If rng Is Nothing Then Exit Sub
 
     ' The text to search for within the replies
     searchText = GetUserText
     If searchText = "" Then Exit Sub
 
-    For Each cell In Rng
+    For Each cell In rng
         ' Check if the cell has a threaded comment
         If Not cell.CommentThreaded Is Nothing Then
             Set threadedComment = cell.CommentThreaded
@@ -47,21 +47,21 @@ Sub tool10_RemoveReplyFromThreadedCommentByText()
 End Sub
 
 Private Function SelectRange() As Range
-    Dim Rng As Range
+    Dim rng As Range
     On Error Resume Next
-    Set Rng = Application.InputBox( _
+    Set rng = Application.InputBox( _
         prompt:="Select a range you'd like the utility to process", _
         title:="Comment Find/Delete Range Selector", _
         Type:=8)
     On Error GoTo 0
     
-    If Rng Is Nothing Then
+    If rng Is Nothing Then
         MsgBox "You did not select a range."
         Exit Function
     End If
     
 
-    Set SelectRange = Rng
+    Set SelectRange = rng
 
 End Function
 

@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool2"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 24September2025
+'Last Updated: 1 October 2025
 
 Option Explicit
 
@@ -28,17 +28,16 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     Dim ib_visitsRng As Range, ib_proceduresRng As Range, ib_gridRng As Range
     
     'OnCore ranges
-    Dim rngCollection As New Collection         'ranges come from function in a collection
+    Dim rngCollection As New Collection         'collection of oncore ranges that
     Dim oncore_visitsRng As Range, oncore_proceduresRng As Range, oncore_gridRng As Range
-    
-'    'OnCore arrays used to find cell on a grid
-'    Dim oncore_visitsArr As Variant, oncore_proceduresArr As Variant
-  
+      
     'the assumption is that a user calls the program by clicking a button
     'located on the tool sheet
     Set toolSheet = ActiveSheet
     
-    'select Int Bdgt Procedures and Visits ranges and set Data range
+    '### STEP 1 ###
+    'get INTERNAL BUDGET RANGES
+    'exit sub if not successful
     If Not SelectRanges(toolSheet) Then
         Exit Sub
     End If
@@ -53,21 +52,37 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     ib_gridRng.Worksheet.Parent.Activate
     ib_gridRng.Worksheet.Activate
 
-    'process billing grid and set OnCore ranges
-    Set rngCollection = tool2_oncore.GetOncoreRanges
+    '### STEP 2 ###
+    'check Visit and Procedure ranges for duplicates
+    'if there are duplicates, highlight them and exit sub
+    If tool2_duplicates.FindAndHighlightDuplicatesTwoRanges(ib_proceduresRng, ib_visitsRng) Then
+        ActiveWindow.WindowState = xlMaximized
+        MsgBox ("Please ensure all visit and procedure names are unique. Tool2 has identified " _
+                & "duplicates, highlighted them in red, and halted execution. Kindly resolve " _
+                & "these duplicates and rerun the tool. Thank you.")
+        Exit Sub
+    End If
+
+    '### STEP 3 ###
+    'convert billing grid to internal budget grid type and get ONCORE RANGES
+    'exit sub if not successful
+    Set rngCollection = tool2_oncore.GetOncoreRanges(ib_gridRng.Worksheet.name)
     
     If rngCollection.count = 0 Then Exit Sub
     
     Set oncore_proceduresRng = rngCollection(1)
     Set oncore_visitsRng = rngCollection(2)
     Set oncore_gridRng = rngCollection(3)
-        
-'    oncore_visitsArr = ConvertRangeToArray(oncore_visitsRng)
-'    oncore_proceduresArr = ConvertRangeToArray(oncore_proceduresRng)
     
-    Call tool2_overwriteNames.OverwriteProcedureAndVisitNames(ib_proceduresRng, ib_visitsRng, _
-                                        oncore_proceduresRng, oncore_visitsRng)
-    
+    '### STEP 4 ###
+    'update visit and procedure names on the internal budget
+    'exit sub if user terminates the program by clicking 'Exit'
+    If tool2_overwriteNames.OverwriteProcedureAndVisitNames(ib_proceduresRng, _
+                                                            ib_visitsRng, _
+                                                            oncore_proceduresRng, _
+                                                            oncore_visitsRng) Then Exit Sub
+    '### STEP 5 ###
+    'process internal budget grid
     Call ProcessGrids(ib_visitsRng, _
                             ib_proceduresRng, _
                             ib_gridRng, _
@@ -76,31 +91,6 @@ Sub tool2_UpdateIntBdgtGridToOncore()
                             oncore_gridRng)
 
 End Sub
-
-Private Function ConvertRangeToArray(Rng) As Variant
-
-    Dim arr() As Variant
-    arr = Rng.Value
-    
-'    Dim rows As Long, cols As Long
-'    Dim row As Long, col As Long
-'
-'    rows = UBound(arr, 1) - LBound(arr, 1) + 1  ' Number of rows
-'    cols = UBound(arr, 2) - LBound(arr, 2) + 1  ' Number of columns
-'
-'    'iterate through columns and clean up the names
-'    For col = 1 To cols
-'        arr(1, col) = Left(Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(CStr(arr(1, col)))), 255)
-'    Next col
-'
-'    'iterate through rows and clean up the names
-'    For row = 1 To rows
-'        arr(row, 1) = Left(Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(CStr(arr(row, 1)))), 255)
-'    Next row
-
-    ConvertRangeToArray = arr
-
-End Function
 
 Private Sub ProcessGrids(ib_visitsRng As Range, _
                             ib_proceduresRng As Range, _
@@ -215,6 +205,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
                                             fillColor_differentFromOncore, _
                                             ib_value, _
                                             oncore_value) = 1 Then
+                    oncore_gridRng.Worksheet.Parent.Close SaveChanges:=False 'close workbook
                     Exit Sub
                 End If
             
@@ -225,20 +216,21 @@ nextVisit:
 nextProcedure:
     Next ib_currRow
         
-Call Done
+Call Done(oncore_gridRng)
 
 End Sub
 
-Private Sub Done()
+Private Sub Done(rng As Range)
 'shows message that the program is done
-
-MsgBox ("Tool2 finished updating the grid.")
+    
+    rng.Worksheet.Parent.Close SaveChanges:=False 'close workbook
+    MsgBox ("Tool2 finished updating the grid.")
 
 End Sub
 
 Private Function SelectRanges(toolSheet As Worksheet) As Boolean
-    
-    'Int Bdgt Related - select two ranges and set data range
+'function selects two ranges and sets a data range; returns true if successful, false otherwise
+
     'if data range can't be set, execution stops
     If Not SelectIntBdgtRanges(toolSheet) Then
         SelectRanges = False

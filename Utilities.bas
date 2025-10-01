@@ -10,23 +10,23 @@ Function SelectRange(ByVal title As String, ByVal prompt As String)
 'the second action is necessary because otherwise excel seems to be confused about what
 'ActiveSheet it is on
 
-    Dim Rng As Range
+    Dim rng As Range
     
     'on Error Resume Next takes the program to the next line in case the user cancels selecting a range
     On Error Resume Next
     'get a range input from the user for Unit Rates
-    Set Rng = Application.InputBox( _
+    Set rng = Application.InputBox( _
                 title:=title, _
                 prompt:=prompt, _
                 Type:=8)
 
-    If Not (Rng Is Nothing) Then
-        Rng.Parent.Activate
+    If Not (rng Is Nothing) Then
+        rng.Parent.Activate
     End If
 
     'MsgBox prompt:="you selected " & rng.Address(external:=True)
 
-    Set SelectRange = Rng
+    Set SelectRange = rng
 
 End Function
 
@@ -96,7 +96,7 @@ Function IsSheetFound(ByVal wkb As Workbook, ByVal sheetName As String)
     sheetName = LCase(sheetName)
     
     For Each curSheet In wkb.Worksheets
-        If LCase(curSheet.Name) = sheetName Then
+        If LCase(curSheet.name) = sheetName Then
             IsSheetFound = True
             Exit Function
         End If
@@ -152,8 +152,8 @@ Sub WriteSelectedRangeComponentsToCells(row_workbookName As Integer, _
         savedSheetName = .Cells(row_sheetName, column_allComponents)
     End With
     
-    selectedWorkbookName = inputRange.Parent.Parent.Name
-    selectedSheetName = inputRange.Parent.Name
+    selectedWorkbookName = inputRange.Parent.Parent.name
+    selectedSheetName = inputRange.Parent.name
     
     promptPart1 = "Your selection changed" & Chr(10)
     
