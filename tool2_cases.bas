@@ -65,7 +65,7 @@ Sub PrevNothingCurrX(cell As Range, fillColor As Long, prevValue As Variant, cur
 
 End Sub
 
-Sub PrevInvoiceCurrOne(cell As Range, fillColor As Long, prevValue As Variant, currValue As Variant)
+Sub PrevEquivalentToOneCurrOne(cell As Range, fillColor As Long, prevValue As Variant, currValue As Variant)
     Dim msg As String
     msg = AssembleComment("auto-kept previous internal budget value", prevValue, currValue)
     
@@ -263,3 +263,4 @@ Sub ConvertNoteToComment(cell As Range)
     End If
     
 End Sub
+

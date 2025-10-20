@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool3"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Hui Zeng, Man Ming Tse
-'Last Updated: 19January2025
+'Last Updated: 20October2025
 
 Option Explicit
 
@@ -167,14 +167,15 @@ Private Sub SetVisitNamesFormula(toolSheet As Worksheet)
 'this subroutine writes a formula to add visit names to section 1
 'note that this formula has one implicit intersection operator: @sbOnlyVisitNamesArray
 'it is added to make sure we are looking at the top left cell of an potential array
+'if user selects multiple rows, the formula will take the first row ONLY
 
 '=LET(
-'    ibVisitNamesArray, TRIM(CLEAN('[Internal Budget_CC246510_Cheng_Merck_vk_v3_6Jan2024.xlsm]Budget_Details_ADJ_DBL'!$M$10:$BA$10)),
-'    sbVisitNamesArray, TRIM(CLEAN('[Internal Budget_CC246510_Cheng_Merck_vk_v3_6Jan2024.xlsm]Research Alloc Grid - NADJ&ADJ'!$B$7:$AG$7)),
-'    sbOnlyVisitNamesArray, UNIQUE(HSTACK(ibVisitNamesArray,ibVisitNamesArray,sbVisitNamesArray),TRUE,TRUE),
-'    sbOnlyVisitNamesArrayEmpty, IFERROR(@sbOnlyVisitNamesArray,TRUE),
-'    uniqueVisitNamesArray, IF(sbOnlyVisitNamesArrayEmpty = TRUE, ibVisitNamesArray, HSTACK(ibVisitNamesArray,sbOnlyVisitNamesArray)),
-'    IF(uniqueVisitNamesArray="","",uniqueVisitNamesArray)
+'    ibVisitNamesArray, TRIM(CLEAN(CHOOSEROWS('[Internal_Budget_25086_Vo_KinLET_vk_v5_19Oct2025.xlsx]Budget Details_P1_Coh1'!$AM$32:$CZ$33, 1))),
+'    sbVisitNamesArray, TRIM(CLEAN(CHOOSEROWS('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$141:$DT$154,1))),
+'    sbOnlyVisitNamesArray, UNIQUE(HSTACK(ibVisitNamesArray, ibVisitNamesArray, sbVisitNamesArray), TRUE, TRUE),
+'    sbOnlyVisitNamesArrayEmpty, IFERROR(@sbOnlyVisitNamesArray, TRUE),
+'    uniqueVisitNamesArray, IF(sbOnlyVisitNamesArrayEmpty = TRUE, ibVisitNamesArray, HSTACK(ibVisitNamesArray, sbOnlyVisitNamesArray)),
+'    IF(uniqueVisitNamesArray = "", "", uniqueVisitNamesArray)
 ')
 
     Dim ibVisitNamesRange As String
@@ -186,12 +187,12 @@ Private Sub SetVisitNamesFormula(toolSheet As Worksheet)
     Dim formula As String
 
     formula = "=LET(" & Chr(10) _
-                    & String(4, Chr(32)) & "ibVisitNamesArray, TRIM(CLEAN(" & ibVisitNamesRange & "))," & Chr(10) _
-                    & String(4, Chr(32)) & "sbVisitNamesArray, TRIM(CLEAN(" & sbVisitNamesRange & "))," & Chr(10) _
-                    & String(4, Chr(32)) & "sbOnlyVisitNamesArray, UNIQUE(HSTACK(ibVisitNamesArray,ibVisitNamesArray,sbVisitNamesArray),TRUE,TRUE)," & Chr(10) _
-                    & String(4, Chr(32)) & "sbOnlyVisitNamesArrayEmpty, IFERROR(@sbOnlyVisitNamesArray,TRUE)," & Chr(10) _
-                    & String(4, Chr(32)) & "uniqueVisitNamesArray, IF(sbOnlyVisitNamesArrayEmpty = TRUE, ibVisitNamesArray, HSTACK(ibVisitNamesArray,sbOnlyVisitNamesArray))," & Chr(10) _
-                    & String(4, Chr(32)) & "IF(uniqueVisitNamesArray="""","""",uniqueVisitNamesArray)" & Chr(10) _
+                    & String(4, Chr(32)) & "ibVisitNamesArray, TRIM(CLEAN(CHOOSEROWS(" & ibVisitNamesRange & ", 1)))," & Chr(10) _
+                    & String(4, Chr(32)) & "sbVisitNamesArray, TRIM(CLEAN(CHOOSEROWS(" & sbVisitNamesRange & ",1)))," & Chr(10) _
+                    & String(4, Chr(32)) & "sbOnlyVisitNamesArray, UNIQUE(HSTACK(ibVisitNamesArray, ibVisitNamesArray, sbVisitNamesArray), TRUE, TRUE)," & Chr(10) _
+                    & String(4, Chr(32)) & "sbOnlyVisitNamesArrayEmpty, IFERROR(@sbOnlyVisitNamesArray, TRUE)," & Chr(10) _
+                    & String(4, Chr(32)) & "uniqueVisitNamesArray, IF(sbOnlyVisitNamesArrayEmpty = TRUE, ibVisitNamesArray, HSTACK(ibVisitNamesArray, sbOnlyVisitNamesArray))," & Chr(10) _
+                    & String(4, Chr(32)) & "IF(uniqueVisitNamesArray = """", """", uniqueVisitNamesArray)" & Chr(10) _
                 & String(0, Chr(32)) & ")" & Chr(10)
                 
     toolSheet.Cells(row_visitNamesFormula, column_visitNamesFormula).Formula2 = formula
@@ -334,29 +335,31 @@ Private Sub SetGridFormula(row_formula As Integer, _
 'this subroutine writes a formula to add to the top left corner of the grid in section 5
 
 '=LET(
-'    curIdCell, $E101,
-'    curProcedureCell, $G101,
-'    curVisitCell, I$100,
+'    curIdCell, $E500,
+'    curProcedureCell, $G500,
+'    curVisitCell, I$499,
 '    curNegRateCell,
 '    IF(
-'        ISNUMBER(SEARCH("inr",curIdCell)),
+'        ISNUMBER(SEARCH("inr", curIdCell)),
 '        "",
-'        $H101
+'        $H500
 '    ),
 '
-'    IF(OR(AND(curProcedureCell="",curIdCell=""),curVisitCell=""),
+'    IF(OR(AND(curProcedureCell = "", curIdCell = ""), curVisitCell = ""),
 '        "",
 '        LET(
-'            curId,TRIM(CLEAN(curIdCell)),
-'            curProcedure,LEFT(TRIM(CLEAN(curProcedureCell)),255),
-'            curVisit,TRIM(CLEAN(curVisitCell)),
-'            dataRange, '[Internal Budget_CC246510_Cheng_Merck_vk_v4.1_8Jan2025.xlsm]Budget_Details_ADJ_DBL'!$M$16:$BA$198,
-'            idRange,TRIM(CLEAN('[Internal Budget_CC246510_Cheng_Merck_vk_v4.1_8Jan2025.xlsm]Budget_Details_ADJ_DBL'!$G$16:$G$198)),
-'            procedureRange,LEFT(TRIM(CLEAN('[Internal Budget_CC246510_Cheng_Merck_vk_v4.1_8Jan2025.xlsm]Budget_Details_ADJ_DBL'!$I$16:$I$198)),255),
-'            visitRange,TRIM(CLEAN('[Internal Budget_CC246510_Cheng_Merck_vk_v4.1_8Jan2025.xlsm]Budget_Details_ADJ_DBL'!$M$10:$BA$10)),
-'            indexRow, IF(curProcedure="", MATCH(curId,idRange,0),MATCH(curProcedure,procedureRange,0)),
-'            indexColumn,MATCH(curVisit,visitRange,0),
-'            curTimePoint,INDEX(dataRange,indexRow,indexColumn),
+'            curId, TRIM(CLEAN(curIdCell)),
+'            curProcedure, TRIM(CLEAN(curProcedureCell)),
+'            curIdProcedure, LEFT(curId & curProcedure, 255),
+'            curVisit, TRIM(CLEAN(curVisitCell)),
+'            dataRange, '[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$142:$DT$283,
+'            idRange, TRIM(CLEAN('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$DV$142:$DV$283)),
+'            procedureRange, TRIM(CLEAN('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$B$142:$B$283)),
+'            idProcedureRange, LEFT(idRange & procedureRange, 255),
+'            visitRange, TRIM(CLEAN(CHOOSEROWS('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$141:$DT$154, 1))),
+'            indexRow, MATCH(curIdProcedure, idProcedureRange, 0),
+'            indexColumn, MATCH(curVisit, visitRange, 0),
+'            curTimePoint, INDEX(dataRange, indexRow, indexColumn),
 '            rawOutput,
 '            IF(
 '                ISNA(curTimePoint),
@@ -368,17 +371,17 @@ Private Sub SetGridFormula(row_formula As Integer, _
 '                        curNegRateCell = "",
 '                        curTimePoint,
 '                        IF(
-'                            AND(ISNUMBER(VALUE(curNegRateCell)),ISNUMBER(VALUE(curTimePoint))),
-'                            curNegRateCell*curTimePoint,
+'                            AND(ISNUMBER(VALUE(curNegRateCell)), ISNUMBER(VALUE(curTimePoint))),
+'                            curNegRateCell * curTimePoint,
 '                            IF(
-'                                AND(NOT(ISNUMBER(VALUE(curNegRateCell))),ISNUMBER(VALUE(curTimePoint))),
+'                                AND(NOT(ISNUMBER(VALUE(curNegRateCell))), ISNUMBER(VALUE(curTimePoint))),
 '                                IF(
-'                                    curTimePoint>1,
+'                                    curTimePoint > 1,
 '                                    CONCAT(curTimePoint," x ", curNegRateCell),
 '                                    Concat (curNegRateCell)
 '                                ),
 '                                IF(
-'                                    AND(ISNUMBER(VALUE(curNegRateCell)),NOT(ISNUMBER(VALUE(curTimePoint)))),
+'                                    AND(ISNUMBER(VALUE(curNegRateCell)), NOT(ISNUMBER(VALUE(curTimePoint)))),
 '                                    CONCAT(curTimePoint, " @ ", DOLLAR(curNegRateCell)),
 '                                    CONCAT(curTimePoint, " @ ", curNegRateCell)
 '                                )
@@ -388,7 +391,7 @@ Private Sub SetGridFormula(row_formula As Integer, _
 '                )
 '            ),
 '            IF(
-'                AND(ISNUMBER(SEARCH("inv",curId)), rawOutput<>"", NOT(ISNA(curTimePoint))),
+'                AND(ISNUMBER(SEARCH("inv", curId)), rawOutput <> "", NOT(ISNA(curTimePoint))),
 '                IF(
 '                    ISNUMBER(rawOutput),
 '                    CONCAT("INV: ", DOLLAR(rawOutput)),
@@ -433,24 +436,28 @@ Private Sub SetGridFormula(row_formula As Integer, _
                 & String(4, Chr(32)) & "curVisitCell, " & curVisitCell & "," & Chr(10) _
                 & String(4, Chr(32)) & "curNegRateCell, " & Chr(10) _
                 & String(4, Chr(32)) & "IF(" & Chr(10) _
-                    & String(8, Chr(32)) & "ISNUMBER(SEARCH(""inr"",curIdCell))," & Chr(10) _
+                    & String(8, Chr(32)) & "ISNUMBER(SEARCH(""inr"", curIdCell))," & Chr(10) _
                     & String(8, Chr(32)) & """"" ," & Chr(10) _
                     & String(8, Chr(32)) & curNegRateCell & Chr(10) _
                 & String(4, Chr(32)) & ")," & Chr(10) _
                 & Chr(10) _
-                & String(4, Chr(32)) & "IF(OR(AND(curProcedureCell="""",curIdCell=""""),curVisitCell="""")," & Chr(10) _
+                & String(4, Chr(32)) & "IF(OR(AND(curProcedureCell = """", curIdCell = """"), curVisitCell = """")," & Chr(10) _
                     & String(8, Chr(32)) & """"" ," & Chr(10) _
-                    & String(8, Chr(32)) & "LET(" & Chr(10) _
-                    & String(12, Chr(32)) & "curId,TRIM(CLEAN(curIdCell))," & Chr(10) _
-                    & String(12, Chr(32)) & "curProcedure,LEFT(TRIM(CLEAN(curProcedureCell)),255)," & Chr(10) _
-                    & String(12, Chr(32)) & "curVisit,TRIM(CLEAN(curVisitCell))," & Chr(10) _
+                    & String(8, Chr(32)) & "LET(" & Chr(10)
+    
+    formula = formula _
+                    & String(12, Chr(32)) & "curId, TRIM(CLEAN(curIdCell))," & Chr(10) _
+                    & String(12, Chr(32)) & "curProcedure, TRIM(CLEAN(curProcedureCell))," & Chr(10) _
+                    & String(12, Chr(32)) & "curIdProcedure, LEFT(curId & curProcedure, 255)," & Chr(10) _
+                    & String(12, Chr(32)) & "curVisit, TRIM(CLEAN(curVisitCell))," & Chr(10) _
                     & String(12, Chr(32)) & "dataRange, " & dataRange & "," & Chr(10) _
-                    & String(12, Chr(32)) & "idRange,TRIM(CLEAN(" & idRange & "))," & Chr(10) _
-                    & String(12, Chr(32)) & "procedureRange,LEFT(TRIM(CLEAN(" & procedureRange & ")),255)," & Chr(10) _
-                    & String(12, Chr(32)) & "visitRange,TRIM(CLEAN(" & visitRange & "))," & Chr(10) _
-                    & String(12, Chr(32)) & "indexRow, IF(curProcedure="""", MATCH(curId,idRange,0),MATCH(curProcedure,procedureRange,0))," & Chr(10) _
-                    & String(12, Chr(32)) & "indexColumn,MATCH(curVisit,visitRange,0)," & Chr(10) _
-                    & String(12, Chr(32)) & "curTimePoint,INDEX(dataRange,indexRow,indexColumn)," & Chr(10)
+                    & String(12, Chr(32)) & "idRange, TRIM(CLEAN(" & idRange & "))," & Chr(10) _
+                    & String(12, Chr(32)) & "procedureRange, TRIM(CLEAN(" & procedureRange & "))," & Chr(10) _
+                    & String(12, Chr(32)) & "idProcedureRange, LEFT(idRange & procedureRange, 255)," & Chr(10) _
+                    & String(12, Chr(32)) & "visitRange, TRIM(CLEAN(CHOOSEROWS(" & visitRange & ", 1)))," & Chr(10) _
+                    & String(12, Chr(32)) & "indexRow, MATCH(curIdProcedure, idProcedureRange, 0)," & Chr(10) _
+                    & String(12, Chr(32)) & "indexColumn, MATCH(curVisit, visitRange, 0)," & Chr(10) _
+                    & String(12, Chr(32)) & "curTimePoint, INDEX(dataRange, indexRow, indexColumn)," & Chr(10)
                     
     formula = formula _
                     & String(12, Chr(32)) & "rawOutput," & Chr(10) _
@@ -464,19 +471,19 @@ Private Sub SetGridFormula(row_formula As Integer, _
                                 & String(24, Chr(32)) & "curNegRateCell = """"," & Chr(10) _
                                 & String(24, Chr(32)) & "curTimePoint," & Chr(10) _
                                 & String(24, Chr(32)) & "IF(" & Chr(10) _
-                                    & String(28, Chr(32)) & "AND(ISNUMBER(VALUE(curNegRateCell)),ISNUMBER(VALUE(curTimePoint)))," & Chr(10) _
-                                    & String(28, Chr(32)) & "curNegRateCell*curTimePoint," & Chr(10) _
+                                    & String(28, Chr(32)) & "AND(ISNUMBER(VALUE(curNegRateCell)), ISNUMBER(VALUE(curTimePoint)))," & Chr(10) _
+                                    & String(28, Chr(32)) & "curNegRateCell * curTimePoint," & Chr(10) _
                                     & String(28, Chr(32)) & "IF(" & Chr(10) _
-                                    & String(32, Chr(32)) & "AND(NOT(ISNUMBER(VALUE(curNegRateCell))),ISNUMBER(VALUE(curTimePoint)))," & Chr(10) _
+                                    & String(32, Chr(32)) & "AND(NOT(ISNUMBER(VALUE(curNegRateCell))), ISNUMBER(VALUE(curTimePoint)))," & Chr(10) _
                                     & String(32, Chr(32)) & "IF(" & Chr(10) _
-                                        & String(36, Chr(32)) & "curTimePoint>1," & Chr(10) _
+                                        & String(36, Chr(32)) & "curTimePoint > 1," & Chr(10) _
                                         & String(36, Chr(32)) & "CONCAT(curTimePoint,"" x "", curNegRateCell)," & Chr(10) _
                                         & String(36, Chr(32)) & "CONCAT(curNegRateCell)" & Chr(10) _
                                     & String(32, Chr(32)) & ")," & Chr(10)
                                     
     formula = formula _
                                     & String(32, Chr(32)) & "IF(" & Chr(10) _
-                                        & String(36, Chr(32)) & "AND(ISNUMBER(VALUE(curNegRateCell)),NOT(ISNUMBER(VALUE(curTimePoint))))," & Chr(10) _
+                                        & String(36, Chr(32)) & "AND(ISNUMBER(VALUE(curNegRateCell)), NOT(ISNUMBER(VALUE(curTimePoint))))," & Chr(10) _
                                         & String(36, Chr(32)) & "CONCAT(curTimePoint, "" @ "", DOLLAR(curNegRateCell))," & Chr(10) _
                                         & String(36, Chr(32)) & "CONCAT(curTimePoint, "" @ "", curNegRateCell)" & Chr(10) _
                                     & String(32, Chr(32)) & ")" & Chr(10) _
@@ -488,7 +495,7 @@ Private Sub SetGridFormula(row_formula As Integer, _
                 
     formula = formula _
                 & String(12, Chr(32)) & "IF(" & Chr(10) _
-                    & String(16, Chr(32)) & "AND(ISNUMBER(SEARCH(""inv"",curId)), rawOutput<>"""", NOT(ISNA(curTimePoint)))," & Chr(10) _
+                    & String(16, Chr(32)) & "AND(ISNUMBER(SEARCH(""inv"", curId)), rawOutput <> """", NOT(ISNA(curTimePoint)))," & Chr(10) _
                     & String(16, Chr(32)) & "IF(" & Chr(10) _
                         & String(20, Chr(32)) & "ISNUMBER(rawOutput)," & Chr(10) _
                         & String(20, Chr(32)) & "CONCAT(""INV: "", DOLLAR(rawOutput))," & Chr(10) _

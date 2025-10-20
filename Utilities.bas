@@ -81,6 +81,7 @@ Function IsWorkbookOpen(workbookName As String) As Boolean
     Dim wkb As Workbook
     On Error Resume Next
     Set wkb = Workbooks(workbookName)
+    On Error GoTo 0
     If wkb Is Nothing Then
         IsWorkbookOpen = False
     Else
@@ -102,6 +103,46 @@ Function IsSheetFound(ByVal wkb As Workbook, ByVal sheetName As String)
         End If
     Next
     IsSheetFound = False
+End Function
+
+Function IsRangeStringValid(ws As Worksheet, rngString As String) As Boolean
+'this function returns true if range string is valid and false otherwise
+
+    Dim testRange As Range
+    On Error GoTo InvalidRange
+    Set testRange = ws.Range(rngString)
+    On Error GoTo 0
+    IsRangeStringValid = True
+    Exit Function
+
+InvalidRange:
+    IsRangeStringValid = False
+End Function
+
+Function IsSingleSheet(rng As Range) As Boolean
+'this function returns true if all areas of a non-contiguous range come from a single
+'worksheet; false otherwise
+    Dim area As Range
+    Dim ws As Worksheet
+    Dim firstSheet As Worksheet
+    
+    If rng.Areas.count = 0 Then
+        ' nothing range case: consider this valid (on one sheet)
+        IsSingleSheet = True
+        Exit Function
+    End If
+    
+    Set firstSheet = rng.Areas(1).Worksheet
+    
+    For Each area In rng.Areas
+        Set ws = area.Worksheet
+        If Not ws Is firstSheet Then
+            IsSingleSheet = False
+            Exit Function
+        End If
+    Next area
+    
+    IsSingleSheet = True
 End Function
 
 Function AssembleRangeComponentsToRange(columnIndex As Integer, _
@@ -185,6 +226,35 @@ Sub WriteSelectedRangeComponentsToCells(row_workbookName As Integer, _
 
 End Sub
 
+Private Function SelectDataRngFromNoncontiguousHeaders(ByVal visitsRng As Range, ByVal proceduresRng As Range) As Range
+'this function takes visit and procedure ranges and returns a data range
+'it works for noncontiguous ranges
+
+    Dim singleAreaRng As Range
+    Dim allColumns As Range, allRows As Range
+        
+    'build union of all columns from headers
+    For Each singleAreaRng In visitsRng.Areas
+        If allColumns Is Nothing Then
+            Set allColumns = singleAreaRng.EntireColumn
+        Else
+            Set allColumns = Union(allColumns, singleAreaRng.EntireColumn)
+        End If
+    Next singleAreaRng
+
+    'build union of all rows from headers
+    For Each singleAreaRng In proceduresRng.Areas
+        If allRows Is Nothing Then
+            Set allRows = singleAreaRng.EntireRow
+        Else
+            Set allRows = Union(allRows, singleAreaRng.EntireRow)
+        End If
+    Next singleAreaRng
+
+    Set SelectDataRngFromNoncontiguousHeaders = Application.Intersect(allRows, allColumns)
+
+End Function
+
 Function SetDataRange(row_workbookName As Integer, _
                       row_sheetName As Integer, _
                       row_visitNamesRange As Integer, _
@@ -218,9 +288,12 @@ Function SetDataRange(row_workbookName As Integer, _
             Set visitNamesRng = .Range(visitNamesAddrString)
             Set proceduresRng = .Range(proceduresAddrString)
     
-            Set dataRng = .Range(.Cells(proceduresRng.Cells(1, 1).row, visitNamesRng.Cells(1, 1).column), _
+            'Set dataRng = .Range(.Cells(proceduresRng.Cells(1, 1).row, visitNamesRng.Cells(1, 1).column), _
                                  .Cells(proceduresRng.Cells(proceduresRng.rows.count, 1).row, _
                                                 visitNamesRng.Cells(1, visitNamesRng.Columns.count).column))
+                                                
+            Set dataRng = SelectDataRngFromNoncontiguousHeaders(visitNamesRng, proceduresRng)
+            
         End With
 
         toolSheet.Cells(row_dataRange, column_allComponents) = dataRng.Address(False, False)

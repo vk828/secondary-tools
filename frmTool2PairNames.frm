@@ -141,6 +141,11 @@ Private Sub btnPairSelected_Click()
         'update name on the internal budget
         Set cell = FindCell(ibName)
         With cell
+            'activate workbook
+            .Worksheet.Parent.Activate
+            'activate worksheet
+            .Worksheet.Activate
+            'select
             .Select
             .Value = oncoreName
             .Interior.color = RGB(255, 255, 0)  'fill yellow color
@@ -153,7 +158,16 @@ Private Sub cboIntBdgtName_Change()
     Dim cell As Range
     Set cell = FindCell(Me.cboIntBdgtName.Value)
     
-    If Not cell Is Nothing Then cell.Select
+    If Not cell Is Nothing Then
+        With cell
+            'activate workbook
+            .Worksheet.Parent.Activate
+            'activate worksheet
+            .Worksheet.Activate
+            'select
+            .Select
+        End With
+    End If
 End Sub
 
 Private Function FindCell(ibName As String) As Range

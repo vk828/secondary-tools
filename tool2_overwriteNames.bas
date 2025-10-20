@@ -96,20 +96,34 @@ SkipVisitNames:
     Else
         Unload frmProcedures
         Unload frmVisits
+        Set wbReport = Nothing
     End If
+End Function
+
+Private Function IsWorkbookOpen(wbName As String) As Boolean
+    Dim wb As Workbook
+    On Error Resume Next
+    Set wb = Workbooks(wbName)
+    IsWorkbookOpen = Not wb Is Nothing
+    Set wb = Nothing
+    On Error GoTo 0
 End Function
 
 Sub ReportUnpaired()
 'subroutine creates a workbook and puts unpaired procedures and visits on it
 
     Dim i As Integer
-    'if this is the first time getting a report, add a workbook;
-    'otherwise, clear the report workbook and populate it with information
-    If wbReport Is Nothing Then
-        Set wbReport = Workbooks.Add
+    'if this is not the the first time getting a report, check if the worbook is open,
+    'if it is, clear the report workbook and populate it with information
+    'otherwise, create a report
+    If Not wbReport Is Nothing Then
+        'is it safe to operate on wbReport
+        If IsWorkbookOpen(wbReport.name) Then
+            wbReport.Sheets(1).Columns("A:E").Clear
+            wbReport.Activate
+        End If
     Else
-        wbReport.Sheets(1).Columns("A:E").Clear
-        wbReport.Activate
+        Set wbReport = Workbooks.Add
     End If
     
     With wbReport.Sheets(1)
@@ -158,6 +172,7 @@ End Sub
 Private Function CloseAndCleanUp(frmOne As frmTool2PairNames, frmTwo As frmTool2PairNames, rng As Range) As Boolean
     Unload frmOne
     Unload frmTwo
+    Set wbReport = Nothing
     rng.Worksheet.Parent.Close SaveChanges:=False 'close workbook
     CloseAndCleanUp = True
 End Function
