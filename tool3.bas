@@ -118,7 +118,7 @@ Private Sub SetSectionFive(row_formula As Integer, _
 
         If IsError(.Cells(row_formula, column_proceduresFormula)) Then
             With .Cells(row_formula, column_proceduresFormula)
-                .Value = "can't proceed until error in " & .Offset(0, -2).Address(False, False) & " is fixed"
+                .value = "can't proceed until error in " & .Offset(0, -2).Address(False, False) & " is fixed"
                 .WrapText = False
                 .Font.color = RGB(255, 0, 0)
             End With
@@ -127,7 +127,7 @@ Private Sub SetSectionFive(row_formula As Integer, _
             lastRow = row_formula - 1 + .Cells(row_formula, column_proceduresFormula).SpillingToRange.rows.count
         Else
             With .Cells(row_formula, column_gridTopLeftFormula)
-                .Value = "can't proceed untill values from " & .Offset(0, -2).Address(False, False) & " formula spill to multiple rows and stay within one column"
+                .value = "can't proceed untill values from " & .Offset(0, -2).Address(False, False) & " formula spill to multiple rows and stay within one column"
                 .WrapText = False
                 .Font.color = RGB(255, 0, 0)
             End With

@@ -25,7 +25,7 @@ Attribute FillBlank.VB_ProcData.VB_Invoke_Func = " \n14"
     Set selectedRange = curSheet.Range(Cells(firstRow, firstCol), Cells(lastRow, lastCol))
 
     For Each cel In selectedRange.Cells
-        If cel.Value = "" And cel.Interior.ColorIndex = xlNone Then
+        If cel.value = "" And cel.Interior.ColorIndex = xlNone Then
             cel.ClearContents
             cel.Interior.color = RGB(217, 217, 217)
         End If
@@ -48,7 +48,7 @@ Sub FillCellsOfInterest(curSheet As Worksheet, caDesignCol As Integer, firstRow 
 
     For Each cel In selectedRange.Cells
         
-        celValue = cel.Value
+        celValue = cel.value
         
         If celValue <> "" Then
             If celValue Like "*" & designationsArray(0) & "*" Or _
@@ -278,12 +278,12 @@ Sub ConvertInternalBudgetGridT1toT2(curSheet As Worksheet, startRow As Integer, 
         ElseIf cValue = divChar Then
             With curSheet
                 With .Cells(startRow, startCol)
-                    .Offset(m - 1, n - 1).Value = 1
+                    .Offset(m - 1, n - 1).value = 1
                     curUnitRateCell = .Offset(m - 1, n - 1).Address(RowAbsolute:=False, ColumnAbsolute:=False)
                     If m = 1 Then
                         .Offset(m - 1, n - 1).ColumnWidth = 6
                         With .Offset(m - 2, n - 1)
-                            .Value = "Arm Unit Rate"
+                            .value = "Arm Unit Rate"
                             .Font.Bold = True
                             .WrapText = True
                         End With
@@ -319,14 +319,14 @@ Sub VisitNamesReconciliationRow(curSheet As Worksheet, rowLocation As Integer, n
     
     With curSheet.Cells(rowLocation, nameColumn)
     
-       .Value = "Manually Assigned Visit Name Unique IDs (see comment on the far right)"
+       .value = "Manually Assigned Visit Name Unique IDs (see comment on the far right)"
        .HorizontalAlignment = xlLeft
        .Font.color = vbWhite
     
     End With
     
     With curSheet.Cells(rowLocation, commentColumn)
-        .Value = "***VERY IMPORTANT*** this row, Visit Name Unique IDs, is used by Synkronizer to correctly compare columns. If Synkronizer instead of comparing columns " _
+        .value = "***VERY IMPORTANT*** this row, Visit Name Unique IDs, is used by Synkronizer to correctly compare columns. If Synkronizer instead of comparing columns " _
                     & "shows them as deleted on the source workbook (the Billing Grid with a lower calendar version) and added on the target workbook " _
                     & "(the Billing with a higher calendar version), please add Unique Column IDs to the target workbook in the format of ID_1, " _
                     & "ID_2, ID_3, etc. and then transfer them over to the appropriate columns on the source workbook."
@@ -371,27 +371,27 @@ Sub SaveWB(destinationSheet As Worksheet, sourceSheet As Worksheet, destinationR
         
     'set billing grid specific variables
     With sourceSheet
-        ProtocolNo = Right(.Range("B1").Value, Len(.Range("B1").Value) - 14)
-        PI = Right(.Range("B2").Value, Len(.Range("B2").Value) - 4)
+        ProtocolNo = Right(.Range("B1").value, Len(.Range("B1").value) - 14)
+        PI = Right(.Range("B2").value, Len(.Range("B2").value) - 4)
         PI = Left(PI, InStr(PI, ",") - 1)
-        CalendarVersion = Right(.Range("A4").Value, Len(.Range("A4").Value) - 18)
-        Sponsor = Right(.Range("C1").Value, Len(.Range("C1").Value) - 9)
+        CalendarVersion = Right(.Range("A4").value, Len(.Range("A4").value) - 18)
+        Sponsor = Right(.Range("C1").value, Len(.Range("C1").value) - 9)
         
-        TargetAccrual = .Range("A2").Value
-        AccruedToDate = .Range("C2").Value
-        Status = .Range("C3").Value
+        TargetAccrual = .Range("A2").value
+        AccruedToDate = .Range("C2").value
+        Status = .Range("C3").value
         
-        If Len(.Range("A3").Value) = 12 Then
+        If Len(.Range("A3").value) = 12 Then
             ShortTitle = ""
         Else
-            ShortTitle = Right(.Range("A3").Value, Len(.Range("A3").Value) - 13)
+            ShortTitle = Right(.Range("A3").value, Len(.Range("A3").value) - 13)
         End If
 
         
-        If Len(.Range("A1").Value) < 15 Then
+        If Len(.Range("A1").value) < 15 Then
             PandCANumbers = ""
         Else
-            PandCANumbers = Right(.Range("A1").Value, Len(.Range("A1").Value) - 14) + " | "
+            PandCANumbers = Right(.Range("A1").value, Len(.Range("A1").value) - 14) + " | "
         End If
         
         
@@ -403,10 +403,10 @@ Sub SaveWB(destinationSheet As Worksheet, sourceSheet As Worksheet, destinationR
        
     'write in study/calendar identifiers
     With destinationRangeProtocolInfo
-        .Value = ProtocolNo + " | " + PI + " | " + Sponsor + " | " + ShortTitle
+        .value = ProtocolNo + " | " + PI + " | " + Sponsor + " | " + ShortTitle
         .RowHeight = 45
-        .Offset(1, 0).Value = PandCANumbers + TargetAccrual + " | " + AccruedToDate + " | " + Status
-        .Offset(2, 0).Value = "Calendar Version: " + CalendarVersion
+        .Offset(1, 0).value = PandCANumbers + TargetAccrual + " | " + AccruedToDate + " | " + Status
+        .Offset(2, 0).value = "Calendar Version: " + CalendarVersion
         With .Resize(3, 1)
             .Font.Bold = True
             .WrapText = True
@@ -512,7 +512,7 @@ Sub InsertArmDivider(curSheet As Worksheet, armNumberRow As Integer, firstRow As
         
         With .Cells(armNumberRow, curCol)
         
-            .Value = "Arm_" & counter
+            .value = "Arm_" & counter
             .ColumnWidth = 7
             .VerticalAlignment = xlVAlignCenter
             .HorizontalAlignment = xlHAlignCenter
@@ -520,7 +520,7 @@ Sub InsertArmDivider(curSheet As Worksheet, armNumberRow As Integer, firstRow As
         End With
         
         With .Range(.Cells(firstRow, curCol), .Cells(lastRow, curCol))
-            .Value = divChar
+            .value = divChar
             .Font.color = RGB(165, 165, 165)
             .HorizontalAlignment = xlCenter
         End With
@@ -539,7 +539,7 @@ Sub CopySchedule(destinationSheet As Worksheet, sourceSheet As Worksheet, _
         .Range(.Cells(sourceStartRow, sourceStartCol), .Cells(sourceLastRow, sourceLastCol)).Copy destinationSheet.Cells(destinationStartRow, destinationStartCol)
     End With
     
-    destinationSheet.Cells(destinationStartRow, destinationStartCol).Value = sourceSheet.Cells(sourceStartRow, sourceStartCol - 1)
+    destinationSheet.Cells(destinationStartRow, destinationStartCol).value = sourceSheet.Cells(sourceStartRow, sourceStartCol - 1)
     
     'group columns
     With destinationSheet
@@ -577,7 +577,7 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     'remove footnotes
     Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     'copy segment names into array
-    segmentNamesArray = rng.Value
+    segmentNamesArray = rng.value
     
     For i = 1 To numberOfVisits
         
@@ -605,7 +605,7 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     'remove footnotes
     Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     'copy segment names into array
-    visitNamesArray = rng.Value
+    visitNamesArray = rng.value
             
     'STEP 3 - prepare synk visit names
     For i = 1 To numberOfVisits
@@ -616,7 +616,7 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
         
     'STEP 4 - write to rng
     
-    rng.Value = synkVisitNamesArray
+    rng.value = synkVisitNamesArray
    
     'STEP 5 - add borders for each arm
     With rng
@@ -745,8 +745,8 @@ Sub AggregateCADesignations(curSheet As Worksheet, _
         For Each cel In curSheet.Range(Cells(startRow - 1 + rowCounter, scheduleStartColumn), _
                                         Cells(startRow - 1 + rowCounter, scheduleEndColumn))
             
-            counter = Len(cel.Value)
-            If counter = 0 Or cel.Value = divChar Then
+            counter = Len(cel.value)
+            If counter = 0 Or cel.value = divChar Then
                 celDesignation = ""
                 GoTo ReadyToGoToNextCell
             Else
@@ -755,7 +755,7 @@ Sub AggregateCADesignations(curSheet As Worksheet, _
                     counter = counter - 1
                 Loop
                 
-                celDesignation = Left(cel.Value, counter)
+                celDesignation = Left(cel.value, counter)
             End If
 
         
@@ -795,8 +795,8 @@ Sub AggregateCADesignations(curSheet As Worksheet, _
             'since calculation is turned off, formulas won't produce a value unless forced to calculate
             Application.Calculate
             
-            Cells(startRow - 1 + rowCounter, formulaCol).Value = Cells(startRow - 1 + rowCounter, formulaCol).Value
-            rowArray = Chr(34) & Cells(startRow - 1 + rowCounter, formulaCol).Value & Chr(34) & Chr(44) & Chr(32) & Chr(34)
+            Cells(startRow - 1 + rowCounter, formulaCol).value = Cells(startRow - 1 + rowCounter, formulaCol).value
+            rowArray = Chr(34) & Cells(startRow - 1 + rowCounter, formulaCol).value & Chr(34) & Chr(44) & Chr(32) & Chr(34)
             
             'reset count
             countDesignations = 0
@@ -822,11 +822,11 @@ ReadyToGoToNextCell:
             'since calculation is turned off, formulas won't produce a value unless forced to calculate
             Application.Calculate
             
-            Cells(startRow - 1 + rowCounter, formulaCol).Value = Cells(startRow - 1 + rowCounter, formulaCol).Value
+            Cells(startRow - 1 + rowCounter, formulaCol).value = Cells(startRow - 1 + rowCounter, formulaCol).value
         End If
         
-        If Cells(startRow - 1 + rowCounter, formulaCol).Value = "" Then
-            Cells(startRow - 1 + rowCounter, formulaCol).Value = "floating item; Official Comments column must include OnCore billing designation"
+        If Cells(startRow - 1 + rowCounter, formulaCol).value = "" Then
+            Cells(startRow - 1 + rowCounter, formulaCol).value = "floating item; Official Comments column must include OnCore billing designation"
         End If
     Next
 
@@ -869,7 +869,7 @@ Sub AddOriginalRowOrderIDs(curSheet As Worksheet, _
     
     For currentProcedureCount = 0 To numberOfProcedures - 1
             
-        procedureName = Cells(startRow + currentProcedureCount, procedureColumn).Value
+        procedureName = Cells(startRow + currentProcedureCount, procedureColumn).value
         
         If (Left(Trim(procedureName), 1) = "-") Then
             currentID = currentID + 1
@@ -878,7 +878,7 @@ Sub AddOriginalRowOrderIDs(curSheet As Worksheet, _
             parentCounter = parentCounter + 1
         End If
         
-        Cells(startRow + currentProcedureCount, IdColumn).Value = currentID
+        Cells(startRow + currentProcedureCount, IdColumn).value = currentID
     
     Next currentProcedureCount
                 
@@ -897,7 +897,7 @@ Sub AddSynkronizerRowOrderIDs(curSheet As Worksheet, _
                  
     'add ids
     For i = 1 To numberOfProcedures
-        Cells(startRow + i - 1, synkronizerRowOrderIdColumn).Value = i
+        Cells(startRow + i - 1, synkronizerRowOrderIdColumn).value = i
     Next
     
     If sortBackFlag Then
@@ -917,12 +917,12 @@ Sub RemoveChildRows(curSheet As Worksheet, lastRow As Integer, firstRow As Integ
     
     'Deleting Child Rows
     For i = lastRow To firstRow Step -1
-        procedure = Trim(Cells(i, procedureColumn).Value)
+        procedure = Trim(Cells(i, procedureColumn).value)
         If Left(procedure, 1) = "-" Then
             If Len(Cells(i, eventCodeColumn)) = 0 Then
                 Cells(i, procedureColumn).EntireRow.Delete
             Else
-                Cells(i - 1, eventCodeColumn).Value = Cells(i - 1, eventCodeColumn).Value & ", " & Cells(i, eventCodeColumn)
+                Cells(i - 1, eventCodeColumn).value = Cells(i - 1, eventCodeColumn).value & ", " & Cells(i, eventCodeColumn)
                 Cells(i, procedureColumn).EntireRow.Delete
             End If
         End If
@@ -1394,7 +1394,7 @@ Sub TrimCleanNames(userRange As Range)
         'Clean formula deletes any and all of the first 32 non-printing characters in the 7-bit ASCII set (values 0 through 31)
         ' including line break (value 10) and tab (value 9)
         For Each cRange In userRange.Cells
-            cRange.Value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cRange.Value))
+            cRange.value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cRange.value))
 
         Next
 End Sub

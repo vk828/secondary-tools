@@ -29,10 +29,10 @@ Sub TotalsToX(ByVal unitRatesRng As Range, ByVal totalsRng As Range)
     
     For curRow = 1 To totalRows
     
-        unitRate = unitRatesRng.Cells(curRow, 1).Value
+        unitRate = unitRatesRng.Cells(curRow, 1).value
         If IsNumeric(unitRate) And unitRate > 0 Then
             For curColumn = 1 To totalColumns
-                totalsValue = totalsRng.Cells(curRow, curColumn).Value
+                totalsValue = totalsRng.Cells(curRow, curColumn).value
                 If IsNumeric(totalsValue) And totalsValue > 0 Then
                     'frequency is rounded
                     frequency = Application.WorksheetFunction.MRound(totalsValue / unitRate, roundMultiple)

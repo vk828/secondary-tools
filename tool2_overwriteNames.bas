@@ -49,7 +49,7 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
     
     '### STEP3 ###
     'switch active sheet, so the forms open in that window
-    Call SwitchActiveSheet(ib_proceduresRng)
+    Call Utilities.SwitchActiveSheet(ib_proceduresRng)
     
     '### STEP4 ###
     'pass Int Bdgt ranges to the appropriate user forms to enable the progrma to update names on Int Bdgt
@@ -128,30 +128,30 @@ Sub ReportUnpaired()
     
     With wbReport.Sheets(1)
     
-        .Cells(1, 1).Value = "Unpaired Procedure Names"
+        .Cells(1, 1).value = "Unpaired Procedure Names"
         .Range(.Cells(1, 1), .Cells(1, 2)).Merge
-        .Cells(2, 1).Value = "Internal Budget"
-        .Cells(2, 2).Value = "OnCore"
+        .Cells(2, 1).value = "Internal Budget"
+        .Cells(2, 2).value = "OnCore"
         
         For i = 1 To frmProcedures.IbCollection.count
-            .Cells(i + 2, 1).Value = frmProcedures.IbCollection(i)
+            .Cells(i + 2, 1).value = frmProcedures.IbCollection(i)
         Next i
         
         For i = 1 To frmProcedures.OncoreCollection.count
-            .Cells(i + 2, 2).Value = frmProcedures.OncoreCollection(i)
+            .Cells(i + 2, 2).value = frmProcedures.OncoreCollection(i)
         Next i
         
-        .Cells(1, 4).Value = "Unpaired Visit Names"
+        .Cells(1, 4).value = "Unpaired Visit Names"
         .Range(.Cells(1, 4), .Cells(1, 5)).Merge
-        .Cells(2, 4).Value = "Internal Budget"
-        .Cells(2, 5).Value = "OnCore"
+        .Cells(2, 4).value = "Internal Budget"
+        .Cells(2, 5).value = "OnCore"
         
         For i = 1 To frmVisits.IbCollection.count
-            .Cells(i + 2, 4).Value = frmVisits.IbCollection(i)
+            .Cells(i + 2, 4).value = frmVisits.IbCollection(i)
         Next i
         
         For i = 1 To frmVisits.OncoreCollection.count
-            .Cells(i + 2, 5).Value = frmVisits.OncoreCollection(i)
+            .Cells(i + 2, 5).value = frmVisits.OncoreCollection(i)
         Next i
         
         With .rows("1:2")
@@ -199,16 +199,6 @@ Private Sub ShowModelessFormAndPause(frm As frmTool2PairNames)
     'MsgBox "Form closed, code resumes."
 End Sub
 
-Private Sub SwitchActiveSheet(rng As Range)
-
-    'activates workbook
-    rng.Worksheet.Parent.Activate
-    
-    'activates worksheet
-    rng.Worksheet.Activate
-
-End Sub
-
 Private Function GetUnpairedLists(firstRng As Range, secondRng As Range) As Variant
 'this function takes two ranges and returns an array of two collections containing only unpaired items
 
@@ -225,14 +215,14 @@ Private Function GetUnpairedLists(firstRng As Range, secondRng As Range) As Vari
     'convert range to collection; values are cleaned and trimmed before they are stored in a collection
     'all "" are skipped
     For Each cell In firstRng.Cells
-        name = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
+        name = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
         If name <> "" Then collArray(1).Add name
     Next cell
     
     'convert range to collection; values are cleaned and trimmed before they are stored in a collection
     'all "" are skipped
     For Each cell In secondRng.Cells
-        name = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
+        name = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
         If name <> "" Then collArray(2).Add name
     Next cell
     

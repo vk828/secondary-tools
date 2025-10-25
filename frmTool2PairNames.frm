@@ -117,8 +117,8 @@ Private Sub btnPairSelected_Click()
     'if something is selected in both comboboxes, remove these items
     If ibIndex <> -1 And oncoreIndex <> -1 Then
         
-        ibName = Me.cboIntBdgtName.Value
-        oncoreName = Me.cboOncoreName.Value
+        ibName = Me.cboIntBdgtName.value
+        oncoreName = Me.cboOncoreName.value
         
         'remove item from combobox
         Me.cboIntBdgtName.RemoveItem ibIndex
@@ -147,7 +147,7 @@ Private Sub btnPairSelected_Click()
             .Worksheet.Activate
             'select
             .Select
-            .Value = oncoreName
+            .value = oncoreName
             .Interior.color = RGB(255, 255, 0)  'fill yellow color
         End With
     End If
@@ -156,7 +156,7 @@ End Sub
 
 Private Sub cboIntBdgtName_Change()
     Dim cell As Range
-    Set cell = FindCell(Me.cboIntBdgtName.Value)
+    Set cell = FindCell(Me.cboIntBdgtName.value)
     
     If Not cell Is Nothing Then
         With cell
@@ -175,7 +175,7 @@ Private Function FindCell(ibName As String) As Range
     Dim cell As Range
     
     For Each cell In ibRng.Cells
-        If Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value)) = ibName Then
+        If Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value)) = ibName Then
             Set FindCell = cell
             Exit For 'ensures that the first found instance is returned
         End If

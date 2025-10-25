@@ -197,7 +197,7 @@ Private Sub UpdateProcedureNames(ws As Worksheet, firstRow As Integer, lastRow A
     Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     
     For Each cell In rng
-        cell.Value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
+        cell.value = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
     Next cell
 
 End Sub
@@ -250,11 +250,11 @@ Private Function UpdateVisitNames(ws As Worksheet, _
     rng.UnMerge
     
     'add missing segment names
-    prevSegmentName = rng.Cells(1).Value
+    prevSegmentName = rng.Cells(1).value
     For Each cell In rng
-        curSegmentName = cell.Value
+        curSegmentName = cell.value
         If curSegmentName = "" Then
-            cell.Value = prevSegmentName
+            cell.value = prevSegmentName
         Else
             prevSegmentName = curSegmentName
         End If
@@ -317,7 +317,7 @@ Private Function RemoveRows(ws As Worksheet, firstRow, col) As Integer
     End With
         
     For j = rng.Cells.count To 1 Step -1
-        curProcedureName = Trim(Application.WorksheetFunction.Clean(rng.Cells(j).Value))
+        curProcedureName = Trim(Application.WorksheetFunction.Clean(rng.Cells(j).value))
         For i = LBound(startOfRemovedRows) To UBound(startOfRemovedRows)
             If InStr(1, curProcedureName, startOfRemovedRows(i)) = 1 Then
                 rng.Cells(j).EntireRow.Delete

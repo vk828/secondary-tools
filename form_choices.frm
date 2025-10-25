@@ -28,11 +28,11 @@ Private Sub btn_run_Click()
     picked_designations = collect_input_designations()
     
     If option_caGrid = True Then
-        Call BillingGridToCAFileConverterSynkronizerPrepared(picked_designations, checkbox_remove_footnotes.Value, checkbox_trim_procedure_names.Value, checkbox_sort.Value)
+        Call BillingGridToCAFileConverterSynkronizerPrepared(picked_designations, checkbox_remove_footnotes.value, checkbox_trim_procedure_names.value, checkbox_sort.value)
     ElseIf option_internalBudgetGridFrequencies = True Then
-        Call BillingGridToInternalBudgetGridFrequencies(picked_designations, checkbox_remove_footnotes.Value, checkbox_trim_procedure_names.Value, checkbox_sort.Value)
+        Call BillingGridToInternalBudgetGridFrequencies(picked_designations, checkbox_remove_footnotes.value, checkbox_trim_procedure_names.value, checkbox_sort.value)
     ElseIf option_internalBudgetGridTotals = True Then
-        Call BillingGridToInternalBudgetGridTotals(picked_designations, checkbox_remove_footnotes.Value, checkbox_trim_procedure_names.Value, checkbox_sort.Value)
+        Call BillingGridToInternalBudgetGridTotals(picked_designations, checkbox_remove_footnotes.value, checkbox_trim_procedure_names.value, checkbox_sort.value)
     End If
     
     Unload Me
@@ -45,10 +45,10 @@ Private Sub UserForm_Initialize()
     Height = 350
     Width = 855
     option_caGrid = True
-    designation_NNR.Value = True
-    designation_S0.Value = True
-    designation_S1.Value = True
-    designation_floating.Value = True
+    designation_NNR.value = True
+    designation_S0.value = True
+    designation_S1.value = True
+    designation_floating.value = True
     checkbox_trim_procedure_names = True
     checkbox_remove_footnotes = True
     checkbox_sort = False
@@ -61,47 +61,47 @@ Private Function collect_input_designations()
     
     picked_designations = Split("-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1", ",")
 
-    If designation_S0.Value = True Then
+    If designation_S0.value = True Then
         picked_designations(0) = "S0"
     End If
 
-    If designation_S1.Value = True Then
+    If designation_S1.value = True Then
         picked_designations(1) = "S1"
     End If
 
-    If designation_R.Value = True Then
+    If designation_R.value = True Then
         picked_designations(2) = "R"
     End If
 
-    If designation_RF.Value = True Then
+    If designation_RF.value = True Then
         picked_designations(3) = "R(F)"
     End If
 
-    If designation_RCL.Value = True Then
+    If designation_RCL.value = True Then
         picked_designations(4) = "R(CL)"
     End If
 
-    If designation_NNA.Value = True Then
+    If designation_NNA.value = True Then
         picked_designations(5) = "N(NA)"
     End If
 
-    If designation_NNB.Value = True Then
+    If designation_NNB.value = True Then
         picked_designations(6) = "N(NB)"
     End If
 
-    If designation_NNR.Value = True Then
+    If designation_NNR.value = True Then
         picked_designations(7) = "N(NR)"
     End If
 
-    If designation_NNU.Value = True Then
+    If designation_NNU.value = True Then
         picked_designations(8) = "N(NU)"
     End If
 
-    If designation_NWO.Value = True Then
+    If designation_NWO.value = True Then
         picked_designations(9) = "N(WO)"
     End If
 
-    If designation_floating.Value = True Then
+    If designation_floating.value = True Then
         picked_designations(10) = "floating"
     End If
     

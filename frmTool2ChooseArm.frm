@@ -60,7 +60,7 @@ Private Sub cboArms_Click()
 'sub that is called every time combobox selection is changed
 
     Dim targetSheet As String
-    targetSheet = cboArms.Value
+    targetSheet = cboArms.value
     If targetSheet <> "" Then
         wbOncore.Activate
         Worksheets(targetSheet).Activate
@@ -72,7 +72,7 @@ End Sub
 Private Sub btnSubmit_Click()
 'sub that is called when 'Submit' button is clicked
 
-    selectedSheetName = cboArms.Value
+    selectedSheetName = cboArms.value
     Me.Hide   'hides the form and keeps it in the memory
 End Sub
 

@@ -109,8 +109,8 @@ Private Sub IbOncoreGridCompare()
     Call SetGridFormula(toolSheet)
     
     'if there are more than 1 procedure and 1 visit
-    If Not (IsEmpty(Cells(row_proceduresFormula + 1, column_proceduresFormula).Value) Or _
-            IsEmpty(Cells(row_visitNamesFormula, column_visitNamesFormula + 1).Value)) Then
+    If Not (IsEmpty(Cells(row_proceduresFormula + 1, column_proceduresFormula).value) Or _
+            IsEmpty(Cells(row_visitNamesFormula, column_visitNamesFormula + 1).value)) Then
         
         'find lastRow/lastColumn
         With toolSheet
@@ -178,7 +178,7 @@ Private Sub HighlightNonEmptyCells(curSheet As Worksheet, firstRow As Integer, f
     selectedRange.Interior.color = xlNone
     
     For Each cel In selectedRange.Cells
-        If cel.Value <> "" Then
+        If cel.value <> "" Then
             cel.Interior.color = vbYellow
         End If
     Next cel
@@ -587,14 +587,14 @@ Private Sub addNumbers(toolSheet As Worksheet, sourceRow As Integer, sourceColum
         With toolSheet
             .Range(.Cells(sourceRow, sourceColumn), .Cells(sourceRow + 500, sourceColumn)).Clear
             For i = 1 To count
-                .Cells(sourceRow - 1 + i, sourceColumn).Value = i
+                .Cells(sourceRow - 1 + i, sourceColumn).value = i
             Next
         End With
     Else
         With toolSheet
             .Range(.Cells(sourceRow, sourceColumn), .Cells(sourceRow, sourceColumn + 500)).Clear
             For i = 1 To count
-                .Cells(sourceRow, sourceColumn - 1 + i).Value = i
+                .Cells(sourceRow, sourceColumn - 1 + i).value = i
             Next
         End With
     End If

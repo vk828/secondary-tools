@@ -25,11 +25,11 @@ Sub XToTotals(ByVal unitRatesRng As Range, ByVal totalsRng As Range)
     Dim unitRate As Variant
     
     For curRow = 1 To totalRows
-        unitRate = unitRatesRng.Cells(curRow).Value
+        unitRate = unitRatesRng.Cells(curRow).value
         unitRateAddressString = unitRatesRng.Cells(curRow, 1).Address(RowAbsolute:=False)
         If IsNumeric(unitRate) Then
             For curColumn = 1 To totalColumns
-                totalsValue = totalsRng.Cells(curRow, curColumn).Value
+                totalsValue = totalsRng.Cells(curRow, curColumn).value
                 If totalsValue Like "*x" Then
                     If totalsValue = "x" Then
                         totalsFormulaString = "=round(" & unitRateAddressString & ",2)"

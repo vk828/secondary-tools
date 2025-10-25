@@ -40,7 +40,7 @@ End Sub
 Function AreAllCellsEmpty(rng As Range) As Boolean
     Dim cell As Range
     For Each cell In rng.Cells
-        If CStr(cell.Value) <> "" Then
+        If CStr(cell.value) <> "" Then
             AreAllCellsEmpty = False
             Exit Function
         End If
@@ -58,7 +58,7 @@ Sub PrevNothingCurrX(cell As Range, fillColor As Long, prevValue As Variant, cur
 
     With cell
         .Interior.color = fillColor
-        .Value = currValue
+        .value = currValue
     End With
                 
     Call AddComment(cell, msg)
@@ -160,7 +160,7 @@ Function PrevXCurrY(ibCell As Range, _
     If form_amds.UserResponse = "update" Then
         With ibCell
             .Interior.color = updateFillColor
-            .Value = currValue
+            .value = currValue
         End With
         
         msg = AssembleComment("analyst updated to current onCore value", prevValue, currValue)

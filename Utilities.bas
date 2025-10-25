@@ -39,7 +39,7 @@ Sub RemoveFootnotesFromSelectedRange(userRange As Range)
     'Remove Footnotes from provided range
     For Each cRange In userRange.Cells
             
-        counter = Len(cRange.Value)
+        counter = Len(cRange.value)
         
         'if cell is empty, go to next cell
         If counter = 0 Then
@@ -52,7 +52,7 @@ Sub RemoveFootnotesFromSelectedRange(userRange As Range)
                 counter = counter - 1
             Loop
                     
-            cRange.Value = Left(cRange.Value, counter)
+            cRange.value = Left(cRange.value, counter)
         End If
 NextIteration:
     Next
@@ -226,7 +226,7 @@ Sub WriteSelectedRangeComponentsToCells(row_workbookName As Integer, _
 
 End Sub
 
-Private Function SelectDataRngFromNoncontiguousHeaders(ByVal visitsRng As Range, ByVal proceduresRng As Range) As Range
+Function SelectDataRngFromNoncontiguousHeaders(ByVal visitsRng As Range, ByVal proceduresRng As Range) As Range
 'this function takes visit and procedure ranges and returns a data range
 'it works for noncontiguous ranges
 
@@ -271,10 +271,10 @@ Function SetDataRange(row_workbookName As Integer, _
     
     With toolSheet
     
-        wkbNameStr = .Cells(row_workbookName, column_allComponents).Value
-        wkshNameStr = .Cells(row_sheetName, column_allComponents).Value
-        visitNamesAddrString = .Cells(row_visitNamesRange, column_allComponents).Value
-        proceduresAddrString = .Cells(row_proceduresRange, column_allComponents).Value
+        wkbNameStr = .Cells(row_workbookName, column_allComponents).value
+        wkshNameStr = .Cells(row_sheetName, column_allComponents).value
+        visitNamesAddrString = .Cells(row_visitNamesRange, column_allComponents).value
+        proceduresAddrString = .Cells(row_proceduresRange, column_allComponents).value
     
     End With
 
@@ -386,5 +386,15 @@ Sub OpenNewWorkbook()
     
 ErrorHandler:
 End
+
+End Sub
+
+Sub SwitchActiveSheet(rng As Range)
+
+    'activates workbook
+    rng.Worksheet.Parent.Activate
+    
+    'activates worksheet
+    rng.Worksheet.Activate
 
 End Sub

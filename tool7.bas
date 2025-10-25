@@ -35,7 +35,7 @@ Private Sub FillBlank(rng As Range, color As Long)
     Dim cel As Range
 
     For Each cel In rng.Cells
-        If cel.Value = "" And cel.Interior.ColorIndex = xlNone Then
+        If cel.value = "" And cel.Interior.ColorIndex = xlNone Then
             cel.Interior.color = color
         End If
     Next cel

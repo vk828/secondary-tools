@@ -23,16 +23,18 @@ Private Function FindAndHighlightDuplicates(rng As Range) As Boolean
 
     Dim cell As Range
     Dim dict As Object
-    Dim key As String
     Dim cellValue As String
+    Dim duplicateFound As Boolean
     
     'late binding dictionary
     Set dict = CreateObject("Scripting.Dictionary")
     
+    duplicateFound = False
+    
     ' Count occurrences of cleaned & trimmed values
     For Each cell In rng
-        If Not IsEmpty(cell.Value) Then
-            cellValue = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
+        If Not IsEmpty(cell.value) Then
+            cellValue = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
             If dict.exists(cellValue) Then
                 dict(cellValue) = dict(cellValue) + 1
             Else
@@ -43,15 +45,17 @@ Private Function FindAndHighlightDuplicates(rng As Range) As Boolean
     
     ' Highlight cells whose cleaned & trimmed values appear more than once and if so set a return boolean to true
     For Each cell In rng
-        If Not IsEmpty(cell.Value) Then
-            cellValue = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.Value))
+        If Not IsEmpty(cell.value) Then
+            cellValue = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
             If cellValue <> "" And dict.exists(cellValue) Then
                 If dict(cellValue) > 1 Then
                     cell.Select
                     cell.Interior.color = vbRed
-                    FindAndHighlightDuplicates = True
+                    duplicateFound = True
                 End If
             End If
         End If
     Next cell
+
+    FindAndHighlightDuplicates = duplicateFound
 End Function
