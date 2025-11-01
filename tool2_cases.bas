@@ -83,6 +83,8 @@ Function PrevXCurrY(ibCell As Range, _
                 keepFillColor As Long, _
                 prevValue As Variant, _
                 currValue As Variant) As Integer
+'this is the function that prompts the user to make a decision
+'it returns true if user cancels, false otherwise
     
     Dim ib_sheetName As String
     Dim oncore_sheetName As String
@@ -146,18 +148,18 @@ Function PrevXCurrY(ibCell As Range, _
                     & "Would you like to update to OnCore value?"
     
     'Display the form modelessly
-    form_amds.UserResponse = ""
-    form_amds.Label1 = userFormMsg
+    frmTool2DecideIntBdgtGridValue.UserResponse = ""
+    frmTool2DecideIntBdgtGridValue.Label1 = userFormMsg
     Call OpenForm
 
     'Wait for the user to respond (polling loop)
-    Do While form_amds.Visible
+    Do While frmTool2DecideIntBdgtGridValue.Visible
         DoEvents
     Loop
     
     'Check the response
     'case_a: update
-    If form_amds.UserResponse = "update" Then
+    If frmTool2DecideIntBdgtGridValue.UserResponse = "update" Then
         With ibCell
             .Interior.color = updateFillColor
             .value = currValue
@@ -166,19 +168,19 @@ Function PrevXCurrY(ibCell As Range, _
         msg = AssembleComment("analyst updated to current onCore value", prevValue, currValue)
         Call AddComment(ibCell, msg)
     'case_b: keep
-    ElseIf form_amds.UserResponse = "keep" Then
+    ElseIf frmTool2DecideIntBdgtGridValue.UserResponse = "keep" Then
         ibCell.Interior.color = keepFillColor
         
         msg = AssembleComment("analyst kept previous internal budget value", prevValue, currValue)
         Call AddComment(ibCell, msg)
         
     'case_c: exit
-    ElseIf form_amds.UserResponse = "" Then
+    ElseIf frmTool2DecideIntBdgtGridValue.UserResponse = "" Then
         PrevXCurrY = 1
         Exit Function
     End If
     
-    Unload form_amds
+    Unload frmTool2DecideIntBdgtGridValue
     PrevXCurrY = 0
     
 End Function
@@ -201,7 +203,7 @@ End Function
 Sub OpenForm()
 'opens user form at a specified location on the screen
 
-    With form_amds
+    With frmTool2DecideIntBdgtGridValue
         'manual positioning
         .StartUpPosition = 0
         

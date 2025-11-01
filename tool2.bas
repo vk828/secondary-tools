@@ -170,7 +170,6 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
         'loop through visits on internal budget
         For Each vCell In ib_visitsRng
             
-            visitNumber = visitNumber + 1
             ib_currColumn = vCell.column
             
             'visit name from internal budget
@@ -234,6 +233,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
             
             End If
 nextVisit:
+        visitNumber = visitNumber + 1
         Next vCell
     
 nextProcedure:

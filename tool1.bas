@@ -7,9 +7,9 @@ Option Explicit
 
 Sub tool1_ConvBillingGridToCAorIB()
 ' this subroutine opens userform
-' userform subrotines are in form_choices
+' userform subrotines are in frmTool1Main
 
-    form_choices.Show
+    frmTool1Main.Show
 
 End Sub
 

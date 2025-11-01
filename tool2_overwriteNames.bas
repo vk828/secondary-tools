@@ -1,13 +1,16 @@
 Attribute VB_Name = "tool2_overwriteNames"
 'Author/Developer: Vadim Krifuks
-'Last Updated: 1 October 2025
+'Last Updated: 1 Novermber 2025
 
 Option Explicit
 Option Private Module
 
-Private frmProcedures As frmTool2PairNames
-Private frmVisits As frmTool2PairNames
+'forms to pair procedures and visits
+Private frmProcedures As frmTool2PairIntBdgtNames
+Private frmVisits As frmTool2PairIntBdgtNames
 
+'wbReport holds reference to 'unpaired procedures/visits' workbook
+'if this workbook is open, variable is NOT nothing
 Private wbReport As Workbook
 
 Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
@@ -25,12 +28,13 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
     
     Dim instrStart As String
     Dim instrEnd As String
-        
+    
+    'this variable is true if CloseAndCleanUp was called
     Dim terminateFlag As Boolean
     
     instrStart = "The following names do not have a match. You can manually select the appropriate pair(s) one by one and " _
                 & "click 'Pair Selected' to overwrite the "
-    instrEnd = " on the internal budget. When you are ready to start updating the grid, please click 'Done.' You can also " _
+    instrEnd = " on the internal budget. When you are ready to start updating the grid, please click 'PROCEED to Updating Grid'. You can also " _
                 & "generate a list of unpaired items or abort the program altogether."
 
     Dim collArray As Variant
@@ -52,9 +56,9 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
     Call Utilities.SwitchActiveSheet(ib_proceduresRng)
     
     '### STEP4 ###
-    'pass Int Bdgt ranges to the appropriate user forms to enable the progrma to update names on Int Bdgt
-    Set frmProcedures = New frmTool2PairNames
-    Set frmVisits = New frmTool2PairNames
+    'pass Int Bdgt ranges to the appropriate user forms to enable the program to update names on Int Bdgt
+    Set frmProcedures = New frmTool2PairIntBdgtNames
+    Set frmVisits = New frmTool2PairIntBdgtNames
     Set frmProcedures.RangeToForm = ib_proceduresRng
     Set frmVisits.RangeToForm = ib_visitsRng
 
@@ -91,9 +95,16 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
 SkipVisitNames:
     'if 'exit' was pressed, forms have been unloaded
     If terminateFlag Then
+        'function return is set to TRUE if form(s) were exited intentionaly
         OverwriteProcedureAndVisitNames = terminateFlag
-    'otherwise unload the forms
+    
+    'otherwise, conditionally update report and unload the forms
     Else
+        'if wbReport exists, update it
+        If Not wbReport Is Nothing Then
+            ReportUnpaired
+        End If
+
         Unload frmProcedures
         Unload frmVisits
         Set wbReport = Nothing
@@ -101,6 +112,8 @@ SkipVisitNames:
 End Function
 
 Private Function IsWorkbookOpen(wbName As String) As Boolean
+'function returns true if workbook is open, false otherwise
+
     Dim wb As Workbook
     On Error Resume Next
     Set wb = Workbooks(wbName)
@@ -169,15 +182,28 @@ Sub ReportUnpaired()
     
 End Sub
 
-Private Function CloseAndCleanUp(frmOne As frmTool2PairNames, frmTwo As frmTool2PairNames, rng As Range) As Boolean
+Private Function CloseAndCleanUp(frmOne As frmTool2PairIntBdgtNames, frmTwo As frmTool2PairIntBdgtNames, rng As Range) As Boolean
+'this function conditionally updates 'unpaired report' workbook if it is open, unloads forms, and closes oncore workbook
+'returns true upon completion
+    
+    'if wbReport exists, update it
+    If Not wbReport Is Nothing Then
+        ReportUnpaired
+    End If
+    
     Unload frmOne
     Unload frmTwo
+    
     Set wbReport = Nothing
-    rng.Worksheet.Parent.Close SaveChanges:=False 'close workbook
+    
+    'close onCore workbook
+    rng.Worksheet.Parent.Close SaveChanges:=False
+    
     CloseAndCleanUp = True
 End Function
 
-Private Sub ShowModelessFormAndPause(frm As frmTool2PairNames)
+Private Sub ShowModelessFormAndPause(frm As frmTool2PairIntBdgtNames)
+'show form
     
     With frm
         'manual positioning
@@ -242,5 +268,3 @@ Private Function GetUnpairedLists(firstRng As Range, secondRng As Range) As Vari
     GetUnpairedLists = collArray
     
 End Function
-
-

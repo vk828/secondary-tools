@@ -335,7 +335,7 @@ Private Function ChooseArm(name As String) As String
 'function opens a user form and let's the user pick a billing grid arm
 'it returns the arm name; if user clicks 'Exit' or 'X', the return is "" (empty string)
     
-    Dim uf As New frmTool2ChooseArm
+    Dim uf As New frmTool2ChooseOnCoreArm
     uf.DetailInstructions (name)
     uf.Show
     
