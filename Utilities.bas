@@ -1,6 +1,6 @@
 Attribute VB_Name = "Utilities"
 'Author/Developer: Vadim Krifuks
-'Last Updated: 26December2024
+'Last Updated: 19 November 2025
 
 Option Explicit
 Option Private Module
@@ -369,11 +369,11 @@ Sub OpenNewWorkbook()
         strFile = Application.GetOpenFilename("Excel-files,*.xlsx", 1, "Select the Billing Grid file", "Open", False)
     Else
         ' Is a Mac and will test if running Excel 2011 or higher.
-        If val(Application.Version) > 16 Then
+        If Val(Application.Version) > 16 Then
             strFile = SelectFileOrFilesMac
             strFile = Replace(strFile, ":", "/")
             strFile = Replace(strFile, "Macintosh HD", "")
-        ElseIf val(Application.Version) > 14 Then
+        ElseIf Val(Application.Version) > 14 Then
             strFile = SelectFileOrFilesMac
         End If
     End If
@@ -397,4 +397,12 @@ Sub SwitchActiveSheet(rng As Range)
     'activates worksheet
     rng.Worksheet.Activate
 
+End Sub
+
+Sub TurnOffAutosave(wkb As Workbook)
+'sub to turn off autosave
+
+    If Val(Application.Version) > 15 Then
+        If wkb.AutoSaveOn Then wkb.AutoSaveOn = False
+    End If
 End Sub

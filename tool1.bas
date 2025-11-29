@@ -2,6 +2,7 @@ Attribute VB_Name = "tool1"
 ' [VK 16July2023] tool1_ConvBillingGridToCAorIB was developed by
 ' Vadim Krifuks in close collaboration with Man Ming Tse, Hui Zeng, and other HT2 Team members
 ' a few functions that open/close file were copied from OCTA Internal Budget template file
+' Last Updated: 24 November 2025
 
 Option Explicit
 
@@ -279,7 +280,7 @@ Sub ConvertInternalBudgetGridT1toT2(curSheet As Worksheet, startRow As Integer, 
             With curSheet
                 With .Cells(startRow, startCol)
                     .Offset(m - 1, n - 1).value = 1
-                    curUnitRateCell = .Offset(m - 1, n - 1).Address(RowAbsolute:=False, ColumnAbsolute:=False)
+                    curUnitRateCell = .Offset(m - 1, n - 1).Address(RowAbsolute:=False, columnabsolute:=False)
                     If m = 1 Then
                         .Offset(m - 1, n - 1).ColumnWidth = 6
                         With .Offset(m - 2, n - 1)
@@ -310,9 +311,9 @@ Sub VisitNamesReconciliationRow(curSheet As Worksheet, rowLocation As Integer, n
 'this function adds a row that is used to reconcile visit names between versions
 'synkronizer uses this row to compare columns
 
-    curSheet.rows(rowLocation).Insert
+    curSheet.Rows(rowLocation).Insert
     
-    With curSheet.rows(rowLocation)
+    With curSheet.Rows(rowLocation)
         .Font.Bold = True
         .HorizontalAlignment = xlCenter
     End With
@@ -464,7 +465,7 @@ Sub SaveWB(destinationSheet As Worksheet, sourceSheet As Worksheet, destinationR
     
     On Error GoTo SkipSave
         'Save the file
-        ActiveWorkbook.SaveAs fileName:=fileName & ".xlsx", FileFormat:=xlOpenXMLWorkbook 'updated from FileFormat:=xlWorkbookDefault to allow save on Mac 1/18/21
+        ActiveWorkbook.SaveAs fileName:=ActiveWorkbook.Path & "\" & fileName & ".xlsx", FileFormat:=xlOpenXMLWorkbook 'updated from FileFormat:=xlWorkbookDefault to allow save on Mac 1/18/21
         Exit Sub
 SkipSave:
     MsgBox ("Renaming and saving the original file " & fileNameBG & " to " & fileName & " was skipped. Please rename/save the file manually before closing.")
@@ -622,35 +623,35 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     With rng
         .Interior.color = RGB(198, 224, 180)
         
-        With .Borders(xlEdgeLeft)
+        With .borders(xlEdgeLeft)
             .LineStyle = xlContinuous
             .ColorIndex = 0
             .TintAndShade = 0
             .Weight = xlThin
         End With
             
-        With .Borders(xlEdgeRight)
+        With .borders(xlEdgeRight)
             .LineStyle = xlContinuous
             .ColorIndex = 0
             .TintAndShade = 0
             .Weight = xlThin
         End With
                     
-        With .Borders(xlEdgeTop)
+        With .borders(xlEdgeTop)
             .LineStyle = xlContinuous
             .ColorIndex = 0
             .TintAndShade = 0
             .Weight = xlThin
         End With
             
-        With .Borders(xlEdgeBottom)
+        With .borders(xlEdgeBottom)
             .LineStyle = xlContinuous
             .ColorIndex = 0
             .TintAndShade = 0
             .Weight = xlThin
         End With
                 
-        With .Borders(xlInsideVertical)
+        With .borders(xlInsideVertical)
             .LineStyle = xlContinuous
             .ColorIndex = 0
             .TintAndShade = 0
@@ -942,12 +943,12 @@ Sub FormatArm(curSheet As Worksheet, firstProcedureRow As Integer, scheduleStart
             .ColumnWidth = 60
         End With
         
-        With .rows(1)
+        With .Rows(1)
             .VerticalAlignment = xlVAlignTop
             .Font.Bold = True
         End With
         
-        With .rows("2:4")
+        With .Rows("2:4")
             .HorizontalAlignment = xlCenter
             .WrapText = True
             .VerticalAlignment = xlVAlignTop
@@ -960,42 +961,42 @@ Sub FormatArm(curSheet As Worksheet, firstProcedureRow As Integer, scheduleStart
         End With
                
         With .Range(.Cells(1, 1), .Cells(lastRow, lastCol))
-            With .Borders(xlEdgeLeft)
+            With .borders(xlEdgeLeft)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
                 .TintAndShade = 0
                 .Weight = xlThin
             End With
             
-            With .Borders(xlEdgeRight)
+            With .borders(xlEdgeRight)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
                 .TintAndShade = 0
                 .Weight = xlThin
             End With
                     
-            With .Borders(xlEdgeTop)
+            With .borders(xlEdgeTop)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
                 .TintAndShade = 0
                 .Weight = xlThin
             End With
             
-            With .Borders(xlEdgeBottom)
+            With .borders(xlEdgeBottom)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
                 .TintAndShade = 0
                 .Weight = xlThin
             End With
                 
-            With .Borders(xlInsideVertical)
+            With .borders(xlInsideVertical)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
                 .TintAndShade = 0
                 .Weight = xlThin
             End With
             
-            With .Borders(xlInsideHorizontal)
+            With .borders(xlInsideHorizontal)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
                 .TintAndShade = 0
@@ -1182,7 +1183,7 @@ Sub BillingGridToCAFileConverter(ByRef designationsArray() As String, _
         'original billing grid file
         'lastCol and lastRow of an arm based on 1st row and 1st column
         lastCol = Cells(1, Columns.count).End(xlToLeft).column      'last column of an arm sheet (not new sheet that we added to the Billing Grid)
-        lastRow = Cells(rows.count, 1).End(xlUp).row                'last row of an arm sheet (not new sheet that we added to the Billing Grid)
+        lastRow = Cells(Rows.count, 1).End(xlUp).Row                'last row of an arm sheet (not new sheet that we added to the Billing Grid)
         billingGridOriginalNumberOfProcedureRows = lastRow - billingGridOriginalFirstProcedureRow + 1
         
         If j = False Then
@@ -1278,7 +1279,7 @@ NextIteration:
                         procedureColumn, eventCodeColumn)
     
     'lastRow is now a variable of the new sheet
-    lastRow = Cells(rows.count, synkColumn).End(xlUp).row
+    lastRow = Cells(Rows.count, synkColumn).End(xlUp).Row
     
     
     If checkbox_sort Then
@@ -1331,7 +1332,7 @@ NextIteration:
     
     'Call VisitNamesReconciliationRow(wb.Worksheets(renamedTemplateSheetName), scheduleStartRow + 3, procedureColumn, curArmStartColumn - 1)
     
-    lastRow = Cells(rows.count, procedureColumn).End(xlUp).row
+    lastRow = Cells(Rows.count, procedureColumn).End(xlUp).Row
         
     With wb.Worksheets(renamedTemplateSheetName)
     

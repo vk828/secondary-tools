@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool2"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 25 October 2025
+'Last Updated: 19 November 2025
 
 Option Explicit
 
@@ -60,6 +60,9 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     'switch view to internal budget
     ib_gridRng.Worksheet.Parent.Activate
     ib_gridRng.Worksheet.Activate
+
+    'turn off internal budget autosave
+    Call Utilities.TurnOffAutosave(ib_gridRng.Worksheet.Parent)
 
     '### STEP 2 ###
     'check Visit and Procedure ranges for duplicates
@@ -150,7 +153,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
     For Each hCell In ib_proceduresRng
         
         visitNumber = 1
-        ib_currRow = hCell.row
+        ib_currRow = hCell.Row
         
         'procedure name from internal budget
         procedureName = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(hCell.value))
@@ -162,7 +165,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
         'if procedure is not found
         If IsError(oncore_currRow) Then
             Call tool2_cases.ProcedureNotFound(hCell, _
-                    Application.Intersect(ib_gridRng, ib_gridRng.Worksheet.rows(ib_currRow)), _
+                    Application.Intersect(ib_gridRng, ib_gridRng.Worksheet.Rows(ib_currRow)), _
                     fillColor_differentFromOncore)
             GoTo nextProcedure
         End If

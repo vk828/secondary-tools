@@ -167,7 +167,7 @@ Sub ReportUnpaired()
             .Cells(i + 2, 5).value = frmVisits.OncoreCollection(i)
         Next i
         
-        With .rows("1:2")
+        With .Rows("1:2")
             .Font.Bold = True
             .HorizontalAlignment = xlCenter
         End With

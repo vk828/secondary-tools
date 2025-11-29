@@ -12,7 +12,7 @@ Sub TotalsToX(ByVal unitRatesRng As Range, ByVal totalsRng As Range)
     Dim totalRows As Integer
     Dim totalColumns As Integer
     
-    totalRows = unitRatesRng.rows.count
+    totalRows = unitRatesRng.Rows.count
     totalColumns = totalsRng.Columns.count
 
     Dim curRow As Integer

@@ -124,7 +124,7 @@ Private Sub SetSectionFive(row_formula As Integer, _
             End With
             GoTo Done
         ElseIf .Cells(row_formula, column_proceduresFormula).HasSpill And .Cells(row_formula, column_proceduresFormula).SpillingToRange.Columns.count = 1 Then
-            lastRow = row_formula - 1 + .Cells(row_formula, column_proceduresFormula).SpillingToRange.rows.count
+            lastRow = row_formula - 1 + .Cells(row_formula, column_proceduresFormula).SpillingToRange.Rows.count
         Else
             With .Cells(row_formula, column_gridTopLeftFormula)
                 .value = "can't proceed untill values from " & .Offset(0, -2).Address(False, False) & " formula spill to multiple rows and stay within one column"
@@ -415,7 +415,7 @@ Private Sub SetGridFormula(row_formula As Integer, _
         curProcedureCell = .Cells(row_formula, column_proceduresFormula).Address(RowAbsolute:=False)
         curNegRateCell = .Cells(row_formula, column_negRatesFormula).Address(RowAbsolute:=False)
         
-        curVisitCell = .Cells(row_formula - 1, column_gridTopLeftFormula).Address(ColumnAbsolute:=False)
+        curVisitCell = .Cells(row_formula - 1, column_gridTopLeftFormula).Address(columnabsolute:=False)
     End With
     
     Dim idRange As String
@@ -796,18 +796,18 @@ Private Sub AdjustIdsProceduresNegRatesRanges(column_allComponents As Integer, _
         column_proceduresRng = proceduresRng.Cells(1, 1).column
         
         'find start row
-        If idsRng.Cells(1, 1).row < proceduresRng.Cells(1, 1).row Then
-            row_start = idsRng.Cells(1, 1).row
+        If idsRng.Cells(1, 1).Row < proceduresRng.Cells(1, 1).Row Then
+            row_start = idsRng.Cells(1, 1).Row
         Else
-            row_start = proceduresRng.Cells(1, 1).row
+            row_start = proceduresRng.Cells(1, 1).Row
         End If
 
         'find end row
-        If idsRng.Cells(idsRng.rows.count, 1).row > proceduresRng.Cells(proceduresRng.rows.count, 1).row Then
+        If idsRng.Cells(idsRng.Rows.count, 1).Row > proceduresRng.Cells(proceduresRng.Rows.count, 1).Row Then
             
-            row_end = idsRng.Cells(idsRng.rows.count, 1).row
+            row_end = idsRng.Cells(idsRng.Rows.count, 1).Row
         Else
-            row_end = proceduresRng.Cells(proceduresRng.rows.count, 1).row
+            row_end = proceduresRng.Cells(proceduresRng.Rows.count, 1).Row
         End If
 
         'compare start and end rows against rows of negRatesRng if negRatesRng is provided
@@ -816,13 +816,13 @@ Private Sub AdjustIdsProceduresNegRatesRanges(column_allComponents As Integer, _
             column_negRatesRng = negRatesRng.Cells(1, 1).column
 
             'find start row
-            If row_start > negRatesRng.Cells(1, 1).row Then
-                row_start = negRatesRng.Cells(1, 1).row
+            If row_start > negRatesRng.Cells(1, 1).Row Then
+                row_start = negRatesRng.Cells(1, 1).Row
             End If
 
             'find end row
-            If row_end < negRatesRng.Cells(negRatesRng.rows.count, 1).row Then
-                row_end = negRatesRng.Cells(negRatesRng.rows.count, 1).row
+            If row_end < negRatesRng.Cells(negRatesRng.Rows.count, 1).Row Then
+                row_end = negRatesRng.Cells(negRatesRng.Rows.count, 1).Row
             End If
             
             're-write negRatesRange

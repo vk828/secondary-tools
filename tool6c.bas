@@ -165,7 +165,7 @@ Private Function AdjustProceduresAndVisitsRanges(rawRange() As Range) As Range()
     Dim outputRange(0 To 1) As Range
     
     Set outputRange(0) = rawRange(0).Columns(1)
-    Set outputRange(1) = rawRange(1).rows(1)
+    Set outputRange(1) = rawRange(1).Rows(1)
     
     AdjustProceduresAndVisitsRanges = outputRange
 End Function
@@ -178,8 +178,8 @@ Private Function SetValuesRange(rng() As Range) As Range
     Dim topRow, bottomRow, leftColumn, rightColumn As Long
     
     With rng(0)
-        topRow = .rows(1).row
-        bottomRow = .rows(.rows.count).row
+        topRow = .Rows(1).Row
+        bottomRow = .Rows(.Rows.count).Row
     End With
     
     With rng(1)
@@ -227,7 +227,7 @@ Private Sub GenerateAndFillTwoDimensionalLookupFormulas(ByVal sourceProceduresRn
     sourceValuesAddress = sourceValuesRng.Address(external:=True)
     
     lookupFirstProcedureAddress = destinationProceduresRng.Cells(1, 1).Address(RowAbsolute:=False)
-    lookupFirstVisitAddress = destinationVisitsRng.Cells(1, 1).Address(ColumnAbsolute:=False)
+    lookupFirstVisitAddress = destinationVisitsRng.Cells(1, 1).Address(columnabsolute:=False)
     
     procedureNorVisitFoundMsg = """NO RESULT"""
     noProcedureFoundMsg = """NO RESULT for ""&" & lookupFirstProcedureAddress

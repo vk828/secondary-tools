@@ -114,7 +114,7 @@ Private Sub IbOncoreGridCompare()
         
         'find lastRow/lastColumn
         With toolSheet
-            lastRow = .Cells(row_proceduresFormula, column_proceduresFormula).End(xlDown).row
+            lastRow = .Cells(row_proceduresFormula, column_proceduresFormula).End(xlDown).Row
             lastColumn = .Cells(row_visitNamesFormula, column_visitNamesFormula).End(xlToRight).column
         End With
         
@@ -505,37 +505,37 @@ Private Sub FormatField(toolSheet As Worksheet, sourceRow As Integer, sourceColu
             
             .WrapText = True
             
-            With .Borders(xlEdgeLeft)
+            With .borders(xlEdgeLeft)
                 .LineStyle = xlContinuous
                 .ColorIndex = xlAutomatic
                 .TintAndShade = 0
                 .Weight = xlMedium
             End With
-            With .Borders(xlEdgeTop)
+            With .borders(xlEdgeTop)
                 .LineStyle = xlContinuous
                 .ColorIndex = xlAutomatic
                 .TintAndShade = 0
                 .Weight = xlMedium
             End With
-            With .Borders(xlEdgeBottom)
+            With .borders(xlEdgeBottom)
                 .LineStyle = xlContinuous
                 .ColorIndex = xlAutomatic
                 .TintAndShade = 0
                 .Weight = xlMedium
             End With
-            With .Borders(xlEdgeRight)
+            With .borders(xlEdgeRight)
                 .LineStyle = xlContinuous
                 .ColorIndex = xlAutomatic
                 .TintAndShade = 0
                 .Weight = xlMedium
             End With
-            With .Borders(xlInsideVertical)
+            With .borders(xlInsideVertical)
                 .LineStyle = xlContinuous
                 .ColorIndex = xlAutomatic
                 .TintAndShade = 0
                 .Weight = xlMedium
             End With
-            With .Borders(xlInsideHorizontal)
+            With .borders(xlInsideHorizontal)
                 .LineStyle = xlContinuous
                 .ColorIndex = xlAutomatic
                 .TintAndShade = 0

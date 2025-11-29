@@ -63,11 +63,11 @@ Function VerifyRowsOfTwoRangesAlign(rangeOneName As String, firstRng As Range, r
     
     Dim errorString As String
     
-    unitRatesRngTopRow = firstRng.Cells(1).row
-    unitRatesRngBottomRow = firstRng.Cells(firstRng.rows.count, 1).row
+    unitRatesRngTopRow = firstRng.Cells(1).Row
+    unitRatesRngBottomRow = firstRng.Cells(firstRng.Rows.count, 1).Row
     
-    totalsRngTopRow = secondRng.Cells(1).row
-    totalsRngBottomRow = secondRng.Cells(secondRng.rows.count, 1).row
+    totalsRngTopRow = secondRng.Cells(1).Row
+    totalsRngBottomRow = secondRng.Cells(secondRng.Rows.count, 1).Row
     
     If unitRatesRngTopRow <> totalsRngTopRow Or unitRatesRngBottomRow <> totalsRngBottomRow Then
         

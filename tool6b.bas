@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool6b"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Hui Zeng, Man Ming Tse
-'Last Updated: 20January2025
+'Last Updated: 29November2025
 
 Option Explicit
 
@@ -17,8 +17,7 @@ Sub tool6b_AddHorizLookupFormulas()
     
     'STEP 1 - select and adjust SOURCE RANGES
     
-    note = "Note: Visits and Values ranges adjust to top selected rows of their " & _
-           "respective selections and same start/end columns."
+    note = "Note: Visits and Values ranges auto-adjust to the same start/end columns."
     
     title1 = "Select Source Visits Range"
     prompt1 = "Select SOURCE VISITS range (can be one cell) on the sheet you'd like to " & _
@@ -39,14 +38,17 @@ Sub tool6b_AddHorizLookupFormulas()
         Exit Sub
     End If
     
-    sourceRanges = AdjustVisitsAndValuesRanges(sourceRanges)
+    sourceRanges = LineUpVisitsAndValuesColumns(sourceRanges)
     
     Set sourceVisitsRng = sourceRanges(0)
     Set sourceValuesRng = sourceRanges(1)
     
     'STEP 2 - select and adjust DESTINATION RANGES
     
-    title1 = "Select Loookup Visits Range"
+    note = "Note: Visits and Values ranges auto-adjust to the same start/end columns. " & _
+            "Lookup Visits range is resized to match rows of Source Visits range."
+
+    title1 = "Select Lookup Visits Range"
     prompt1 = "Select LOOKUP VISITS range (can be one cell) on the sheet where you'd like to " & _
               "add lookup formulas TO." _
               & Chr(10) & Chr(10) & _
@@ -64,9 +66,9 @@ Sub tool6b_AddHorizLookupFormulas()
         Exit Sub
     End If
     
-    destinationRanges = AdjustVisitsAndValuesRanges(destinationRanges)
+    destinationRanges = LineUpVisitsAndValuesColumns(destinationRanges)
     
-    Set destinationVisitsRng = destinationRanges(0)
+    Set destinationVisitsRng = ResizeDestinationVisitsRows(sourceRanges(0), destinationRanges(0))
     Set destinationValuesRng = destinationRanges(1)
     
     'STEP 3 - add LOOKUP FORMULAS
@@ -95,7 +97,7 @@ Private Function SelectVisitsAndValuesRanges(ByVal titleFirstSelection As String
                                               ByVal promptFirstSelection As String, _
                                               ByVal titleSecondSelection As String, _
                                               ByVal promptSecondSelection As String) As Range()
-'this funciton: lets the user select Visits and Values ranges, and
+'this function: lets the user select Visits and Values ranges, and
 'returns an array that holds two selected ranges
 
     Dim returnArray(0 To 1) As Range
@@ -126,10 +128,10 @@ Private Function SelectVisitsAndValuesRanges(ByVal titleFirstSelection As String
         'stop looping if workbooks or sheets don't match
         If returnArray(0).Parent.Parent.name <> returnArray(1).Parent.Parent.name Then
             MsgBox ("Visits and Values ranges must be part of the same workbook and " _
-                    & "sheet. You selected two different workbooks. Please try again.")
+                    & "sheet. You selected two different WORKBOOKS. Please try again.")
         ElseIf returnArray(0).Parent.name <> returnArray(1).Parent.name Then
             MsgBox ("Visits and Values ranges must be part of the same workbook and " _
-                    & "sheet. You selected two different sheets. Please try again.")
+                    & "sheet. You selected two different SHEETS. Please try again.")
         Else
             check = True
         End If
@@ -140,81 +142,154 @@ Done:
 
 End Function
 
-Private Function AdjustVisitsAndValuesRanges(rawRange() As Range) As Range()
-'this function adjusts ranges to their top respective rows and same start/end (left/right) columns
-'input: an array with two raw ranges; output: an array with two adjusted ranges
+Private Function LineUpVisitsAndValuesColumns(rawRange() As Range) As Range()
+' Repositions both ranges to share identical start/end columns while preserving row extents
     
-    Dim rowVisits, rowValues As Long
     Dim columnLeft, columnRight, columnLeftTemp, columnRightTemp As Long
     Dim outputRange(0 To 1) As Range
 
+    ' Find overall leftmost and rightmost columns across both ranges
     With rawRange(0)
-        rowVisits = .Cells(1, 1).row
         columnLeft = .Cells(1, 1).column
         columnRight = .Cells(1, .Columns.count).column
     End With
     
     With rawRange(1)
-        rowValues = .Cells(1, 1).row
         columnLeftTemp = .Cells(1, 1).column
         columnRightTemp = .Cells(1, .Columns.count).column
     End With
-
-    If columnLeft > columnLeftTemp Then
-        columnLeft = columnLeftTemp
-    End If
     
-    If columnRight < columnRightTemp Then
-        columnRight = columnRightTemp
-    End If
+    ' Use the absolute leftmost start and rightmost end
+    If columnLeftTemp < columnLeft Then columnLeft = columnLeftTemp
+    If columnRightTemp > columnRight Then columnRight = columnRightTemp
     
+    ' Reposition both ranges to start at columnLeft, with full width
     With rawRange(0).Parent
-        Set outputRange(0) = .Range(Cells(rowVisits, columnLeft), Cells(rowVisits, columnRight))
-        Set outputRange(1) = .Range(Cells(rowValues, columnLeft), Cells(rowValues, columnRight))
+        Set outputRange(0) = .Range(.Cells(rawRange(0).Row, columnLeft), _
+                                   .Cells(rawRange(0).Row + rawRange(0).Rows.count - 1, columnRight))
+        Set outputRange(1) = .Range(.Cells(rawRange(1).Row, columnLeft), _
+                                   .Cells(rawRange(1).Row + rawRange(1).Rows.count - 1, columnRight))
     End With
     
-    AdjustVisitsAndValuesRanges = outputRange
+    LineUpVisitsAndValuesColumns = outputRange
+End Function
+
+Private Function ResizeDestinationVisitsRows(sourceRng As Range, destinationRng As Range) As Range
+' Resizes destination range to be the same number of rows as source range
+    Set ResizeDestinationVisitsRows = destinationRng.Resize(sourceRng.Rows.count)
 End Function
 
 Private Sub GenerateAndFillHorizontalLookupFormulas(ByVal sourceVisitsRng As Range, _
-                                                  ByVal sourceLookupRng As Range, _
-                                                  ByVal destinationProceduresRng As Range, _
-                                                  ByVal destinationLookupRng As Range)
-'this subroutine generates the the lookup formula for the most left cell and then uses it
+                                                  ByVal sourceValuesRng As Range, _
+                                                  ByVal destinationVisitsRng As Range, _
+                                                  ByVal destinationValuesRng As Range)
+'this subroutine generates the the lookup formula for the leftmost cell and then uses it
 'to generate the entire range
 
-'=IF(M$15="",
-'     0,
-'    IF(ISNA(MATCH(LEFT(M$15,255),LEFT(Budget_Details_ADJ_DBL!$M$15:$BA$15,255),0)),
-'        "NO RESULT FOR " & M$15,
-'        (INDEX(Budget_Details_ADJ_DBL!$M$175:$BA$175,,MATCH(LEFT(M$15,255),LEFT(Budget_Details_ADJ_DBL!$M$15:$BA$15,255), 0)))
-'    )
-')
-
-
-    Dim sourceVisitsAddress, sourceValuesAddress, destinationLeftVisitAddress As String
+    Dim sourceVisitsAddress, sourceValuesAddress As String
     Dim formula As String
     Dim notFoundMsg As String
+    Dim destinationCurrVisitAddress As String           'used for single row headers and simple formula
+    Dim destinationVisitsCurrColumnAddress As String    'used for multi row headers and complex formula
+    Dim headerRowsCount As Integer                      'number of rows in the selected headers
     
     notFoundMsg = """NO RESULT for "" & "
 
     sourceVisitsAddress = sourceVisitsRng.Address(external:=True)
-    sourceValuesAddress = sourceLookupRng.Address(external:=True)
-    destinationLeftVisitAddress = destinationProceduresRng.Cells(1, 1).Address(ColumnAbsolute:=False)
+    sourceValuesAddress = sourceValuesRng.Address(external:=True)
+        
+    headerRowsCount = sourceVisitsRng.Rows.count
     
-    formula = "=IF(" & destinationLeftVisitAddress & "=""""," & Chr(10) & _
-                  String(4, Chr(32)) & 0 & "," & Chr(10) & _
-                  String(4, Chr(32)) & "IF(ISNA(MATCH(LEFT(" & destinationLeftVisitAddress & ",255),LEFT(" & sourceVisitsAddress & ",255),0))," & Chr(10) & _
-                      String(8, Chr(32)) & notFoundMsg & destinationLeftVisitAddress & "," & Chr(10) & _
-                      String(8, Chr(32)) & "(INDEX(" & sourceValuesAddress & ",, MATCH(LEFT(" & destinationLeftVisitAddress & ",255), LEFT( " & sourceVisitsAddress & ",255), 0)))" & Chr(10) & _
-                  String(4, Chr(32)) & ")" & Chr(10) & _
-              ")"
+    If headerRowsCount = 1 Then
+        destinationCurrVisitAddress = destinationVisitsRng.Cells(1, 1).Address(columnabsolute:=False)
     
-    'add formula to the left cell
-    destinationLookupRng.Cells(1, 1).Formula2 = formula
+        '=LET(
+        '    currentVisit, LEFT(TRIM(CLEAN(BA$31)), 255),
+        '    sourceVisits, LEFT(TRIM(CLEAN('[CABA-201-002 JIIM_Myositis Budget V4.1_PI Kim_UCSF_FINAL_25Nov2025.xlsx]Post Infusion Follow Up JIIM'!$D$17:$AH$17)), 255),
+        '    sourceValues, '[CABA-201-002 JIIM_Myositis Budget V4.1_PI Kim_UCSF_FINAL_25Nov2025.xlsx]Post Infusion Follow Up JIIM'!$D$71:$AH$71,
+        '    IF(currentVisit = "",
+        '        0,
+        '        LET(
+        '            firstMatchColumnNumber, MATCH(currentVisit, sourceVisits, 0),
+        '            firstValue, INDEX(sourceValues, firstMatchColumnNumber),
+        '            IF(ISNA(firstMatchColumnNumber),
+        '                "NO RESULT for " & currentVisit,
+        '                firstValue
+        '            )
+        '        )
+        '    )
+        ')
+        
+        formula = Space(0) & "=LET(" & Chr(10) & _
+                Space(4) & "currentVisit, LEFT(TRIM(CLEAN(" & destinationCurrVisitAddress & ")), 255)," & Chr(10) & _
+                Space(4) & "sourceVisits, LEFT(TRIM(CLEAN(" & sourceVisitsAddress & ")), 255)," & Chr(10) & _
+                Space(4) & "sourceValues, " & sourceValuesAddress & "," & Chr(10) & _
+                Space(4) & "IF(currentVisit = """"," & Chr(10) & _
+                    Space(8) & "0," & Chr(10) & _
+                    Space(8) & "LET(" & Chr(10) & _
+                        Space(12) & "firstMatchColumnNumber, MATCH(currentVisit, sourceVisits, 0)," & Chr(10) & _
+                        Space(12) & "firstValue, INDEX(sourceValues, firstMatchColumnNumber)," & Chr(10) & _
+                        Space(12) & "IF(ISNA(firstMatchColumnNumber)," & Chr(10) & _
+                            Space(16) & notFoundMsg & "currentVisit," & Chr(10) & _
+                            Space(16) & "firstValue" & Chr(10) & _
+                        Space(12) & ")" & Chr(10) & _
+                    Space(8) & ")" & Chr(10) & _
+                Space(4) & ")" & Chr(10) & _
+            Space(0) & ")"
+
+
+    Else
+        destinationVisitsCurrColumnAddress = destinationVisitsRng.Columns(1).Address(columnabsolute:=False)
+
+        '=LET(
+        '    currentVisitKeys, TRIM(CLEAN(AK$31:AK$33)),
+        '    sourceVisitKeysBlock, TRIM(CLEAN('[CABA-201-002 JIIM_Myositis Budget V4.1_PI Kim_UCSF_FINAL_25Nov2025.xlsx]Screening_Treatment JIIM'!$D$16:$N$18)),
+        '    sourceValues, '[CABA-201-002 JIIM_Myositis Budget V4.1_PI Kim_UCSF_FINAL_25Nov2025.xlsx]Screening_Treatment JIIM'!$D$103:$N$103,
+        '    currentVisitFullName, CONCAT(currentVisitKeys),
+        '    IF(currentVisitFullName = "",
+        '        0,
+        '        LET(
+        '            matchMatrix, (sourceVisitKeysBlock = currentVisitKeys) * 1,
+        '            matchMatrixTotals, MMULT(TRANSPOSE(matchMatrix), SEQUENCE(ROWS(matchMatrix),1,1,0)),
+        '            requiredMatchTotal, ROWS(sourceVisitKeysBlock),
+        '            firstMatchColumnNumber, MATCH(requiredMatchTotal, matchMatrixTotals, 0),
+        '            firstValue, INDEX(sourceValues, firstMatchColumnNumber),
+        '            IF(ISNA(firstMatchColumnNumber),
+        '                "NO RESULT for " & currentVisitFullName,
+        '                firstValue
+        '            )
+        '        )
+        '    )
+        ')
+
+        formula = Space(0) & "=LET(" & Chr(10) & _
+                    Space(4) & "currentVisitKeys, TRIM(CLEAN(" & destinationVisitsCurrColumnAddress & "))," & Chr(10) & _
+                    Space(4) & "sourceVisitKeysBlock, TRIM(CLEAN(" & sourceVisitsAddress & "))," & Chr(10) & _
+                    Space(4) & "sourceValues, " & sourceValuesAddress & "," & Chr(10) & _
+                    Space(4) & "currentVisitFullName, CONCAT(currentVisitKeys)," & Chr(10) & _
+                    Space(4) & "IF(currentVisitFullName = """"," & Chr(10) & _
+                        Space(8) & "0," & Chr(10) & _
+                        Space(8) & "LET(" & Chr(10) & _
+                            Space(12) & "matchMatrix, (sourceVisitKeysBlock = currentVisitKeys) * 1," & Chr(10) & _
+                            Space(12) & "matchMatrixTotals, MMULT(TRANSPOSE(matchMatrix), SEQUENCE(ROWS(matchMatrix),1,1,0))," & Chr(10) & _
+                            Space(12) & "requiredMatchTotal, ROWS(sourceVisitKeysBlock)," & Chr(10) & _
+                            Space(12) & "firstMatchColumnNumber, MATCH(requiredMatchTotal, matchMatrixTotals, 0)," & Chr(10) & _
+                            Space(12) & "firstValue, INDEX(sourceValues, firstMatchColumnNumber)," & Chr(10) & _
+                            Space(12) & "IF(ISNA(firstMatchColumnNumber)," & Chr(10) & _
+                                Space(16) & notFoundMsg & "currentVisitFullName," & Chr(10) & _
+                                Space(16) & "firstValue" & Chr(10) & _
+                            Space(12) & ")" & Chr(10) & _
+                        Space(8) & ")" & Chr(10) & _
+                    Space(4) & ")" & Chr(10) & _
+                Space(0) & ")"
+    End If
+
+    'add formula to the leftmost cell
+    destinationValuesRng.Cells(1, 1).Formula2 = formula
     
     'add formula to the entire range
-    destinationLookupRng.Cells(1, 1).Copy
-    destinationLookupRng.PasteSpecial Paste:=xlPasteFormulas
+    destinationValuesRng.Formula2 = destinationValuesRng.Cells(1, 1).Formula2
 
 End Sub
+
+

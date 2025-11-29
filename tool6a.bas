@@ -149,14 +149,14 @@ Private Function AdjustProceduresAndValuesRanges(rawRange() As Range) As Range()
     Dim outputRange(0 To 1) As Range
 
     With rawRange(0)
-        rowTop = .Cells(1, 1).row
-        rowBottom = .Cells(.rows.count, 1).row
+        rowTop = .Cells(1, 1).Row
+        rowBottom = .Cells(.Rows.count, 1).Row
         columnProcedures = .Cells(1, 1).column
     End With
     
     With rawRange(1)
-        rowTopTemp = .Cells(1, 1).row
-        rowBottomTemp = .Cells(.rows.count, 1).row
+        rowTopTemp = .Cells(1, 1).Row
+        rowBottomTemp = .Cells(.Rows.count, 1).Row
         columnValues = .Cells(1, 1).column
     End With
 

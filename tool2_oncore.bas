@@ -290,8 +290,8 @@ Private Function UpdateVisitNames(ws As Worksheet, _
     
     'hide rows to make it easier to read for a human
     With ws
-        .rows(segmentNamesRow).EntireRow.Hidden = True
-        .rows(visitNamesRow).EntireRow.Hidden = True
+        .Rows(segmentNamesRow).EntireRow.Hidden = True
+        .Rows(visitNamesRow).EntireRow.Hidden = True
     End With
     
     UpdateVisitNames = uniqueNamesRow
@@ -312,7 +312,7 @@ Private Function RemoveRows(ws As Worksheet, firstRow, col) As Integer
     startOfRemovedRows = Array("-", "(INV)")
     
     With ws
-        lastRow = .Cells(.rows.count, col).End(xlUp).row
+        lastRow = .Cells(.Rows.count, col).End(xlUp).Row
         Set rng = .Range(.Cells(firstRow, col), .Cells(lastRow, col))
     End With
         

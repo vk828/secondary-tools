@@ -95,6 +95,9 @@ Function PrevXCurrY(ibCell As Range, _
     Dim userFormMsg As String
     Dim msg As String
 
+    Dim borders As clsCellState
+    Set borders = New clsCellState
+
     'get sheet names
     oncore_sheetName = oncoreCell.Worksheet.name
     ib_sheetName = ibCell.Worksheet.name
@@ -113,17 +116,30 @@ Function PrevXCurrY(ibCell As Range, _
     End If
     
     'get an address of a visit/procedure cell
-    targetAddressStr = ibCell.Address(RowAbsolute:=False, ColumnAbsolute:=False)
-        
-    'activate visit/procedure cell
+    targetAddressStr = ibCell.Address(RowAbsolute:=False, columnabsolute:=False)
+    
+    'save ibCell border state
+    Set borders.CellRng = ibCell
+    borders.GetBorders
+    
+    'create red border around cell for visibility
+    ibCell.BorderAround LineStyle:=xlContinuous, Weight:=xlThick, color:=RGB(255, 0, 0)
+
+    'activate grid cell
     With ibCell
-        ' to select a cell, workbook and worsheet need to be active
+        ' to select a cell; workbook and worsheet need to be active
         ' 1) we activate a workbook the range belongs to
         .Worksheet.Parent.Activate
         ' 2) we activate the worksheet the range belongs to
         .Worksheet.Activate
         ' 3) select the cell
-        .Select
+        ' since we want to show a red border, selected cell can't be the same cell because
+        ' native Excel green border would superceed red
+        ' we will select one to the right, one down
+        ' Union(.EntireColumn, .EntireRow).Select
+        ActiveWindow.ScrollRow = .Row - 5
+        ActiveWindow.ScrollColumn = .column - 5
+        '.Select
     End With
     
     'check if there is a comment in visit/procedure cell
@@ -156,6 +172,9 @@ Function PrevXCurrY(ibCell As Range, _
     Do While frmTool2DecideIntBdgtGridValue.Visible
         DoEvents
     Loop
+    
+    'bring saved borders state back
+    borders.SetBorders
     
     'Check the response
     'case_a: update
