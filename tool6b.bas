@@ -15,6 +15,8 @@ Sub tool6b_AddHorizLookupFormulas()
     Dim sourceVisitsRng, sourceValuesRng, destinationVisitsRng, destinationValuesRng As Range
     Dim outputMsg As String
     
+    Call Instructions
+    
     'STEP 1 - select and adjust SOURCE RANGES
     
     note = "Note: Visits and Values ranges auto-adjust to the same start/end columns."
@@ -92,6 +94,34 @@ Sub tool6b_AddHorizLookupFormulas()
 
 
 End Sub
+
+Private Sub Instructions()
+' routine that provides information about the tool to its user
+
+    Dim message As String
+    
+    message = "Tool adds formulas to a single cell or group of cells to lookup values from " & _
+            "horizontally organized data based on a common label." & _
+            Chr(10) & _
+            Chr(10) & _
+            "User selects four ranges:" & Chr(10) & _
+            " - lookup_array (source visits)" & Chr(10) & _
+            " - return_array (source values)" & Chr(10) & _
+            " - lookup_value (lookup visits)" & Chr(10) & _
+            " - lookup_formula (lookup formulas)" & _
+            Chr(10) & _
+            Chr(10) & _
+            "The lookup_array and return_array ranges will automatically extend so they " & _
+            "share the same left and right column boundaries. Similarly, the lookup_value " & _
+            "and lookup_formula ranges will also automatically extend to share the same " & _
+            "left and right column boundaries. Additionally, " & _
+            "lookup_value will adjust to include the same number of rows as " & _
+            "lookup_array (single or multiple rows)."
+    
+    MsgBox message, vbInformation, "Tool Info"
+
+End Sub
+
 
 Private Function SelectVisitsAndValuesRanges(ByVal titleFirstSelection As String, _
                                               ByVal promptFirstSelection As String, _
@@ -291,5 +321,7 @@ Private Sub GenerateAndFillHorizontalLookupFormulas(ByVal sourceVisitsRng As Ran
     destinationValuesRng.Formula2 = destinationValuesRng.Cells(1, 1).Formula2
 
 End Sub
+
+
 
 

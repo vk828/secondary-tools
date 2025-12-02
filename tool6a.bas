@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool6a"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Hui Zeng, Man Ming Tse
-'Last Updated: 19January2025
+'Last Updated: 30Novemer2025
 
 Option Explicit
 
@@ -14,6 +14,8 @@ Sub tool6a_AddVertLookupFormulas()
     Dim title1, prompt1, title2, prompt2 As String
     Dim sourceProceduresRng, sourceValuesRng, destinationProceduresRng, destinationValuesRng As Range
     Dim outputMsg As String
+    
+    Call Instructions
     
     'STEP 1 - select and adjust SOURCE RANGES
     
@@ -89,6 +91,32 @@ Sub tool6a_AddVertLookupFormulas()
 
     MsgBox outputMsg, vbInformation
 
+
+End Sub
+
+Private Sub Instructions()
+' routine that provides information about the tool to its user
+
+    Dim message As String
+    
+    message = "Tool adds formulas to a single cell or group of cells to lookup values from " & _
+            "vertically organized data based on a common label." & _
+            Chr(10) & _
+            Chr(10) & _
+            "User selects four ranges:" & Chr(10) & _
+            " - lookup_array (source procedures)" & Chr(10) & _
+            " - return_array (source values)" & Chr(10) & _
+            " - lookup_value (lookup procedures)" & Chr(10) & _
+            " - lookup_formula (lookup formulas)" & _
+            Chr(10) & _
+            Chr(10) & _
+            "The lookup_array and return_array ranges will automatically extend to share " & _
+            "the same top and bottom row boundaries, and each will adjust to include only " & _
+            "its first column. Similarly, the lookup_value and lookup_formula ranges will " & _
+            "also automatically extend to share the same top and bottom row boundaries, " & _
+            "and each will adjust to include only its first column."
+    
+    MsgBox message, vbInformation, "Tool Info"
 
 End Sub
 

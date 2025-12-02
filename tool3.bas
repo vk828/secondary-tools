@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool3"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Hui Zeng, Man Ming Tse
-'Last Updated: 20October2025
+'Last Updated: 2December2025
 
 Option Explicit
 
@@ -33,10 +33,11 @@ Const column_proceduresFormula = column_idsFormula + 2
 Const column_negRatesFormula = column_idsFormula + 3
 Const column_gridTopLeftFormula = column_idsFormula + 4
 
-Const row_ibSectionFiveFormulas = 101
-Const row_sbSectionFiveFormulas = 500
+Const row_ibSectionFiveFormulas = 101 + 9 * 2
+Const row_sbSectionFiveFormulas = 500 + 9 * 3
+Const row_sectionFiveShift = 10     'how many rows are allocated for visit names
 
-Const rowsToClearInSectionFive = row_sbSectionFiveFormulas - row_ibSectionFiveFormulas - 1       'max field is 397 rows; we are clearing 398 rows
+Const rowsToClearInSectionFive = row_sbSectionFiveFormulas - row_ibSectionFiveFormulas - row_sectionFiveShift       'max field is 397 rows; we are clearing 398 rows
 Const columnsToClear = 500    'arbitrary number
 
 Sub tool3_HarmonizeIBwithSB()
@@ -166,12 +167,12 @@ End Sub
 Private Sub SetVisitNamesFormula(toolSheet As Worksheet)
 'this subroutine writes a formula to add visit names to section 1
 'note that this formula has one implicit intersection operator: @sbOnlyVisitNamesArray
-'it is added to make sure we are looking at the top left cell of an potential array
-'if user selects multiple rows, the formula will take the first row ONLY
+'it is added to make sure we are looking at the top left cell of a potential array
+'if user selects multiple rows, the number of rows selected on the internal and sponsor budgets must match
 
 '=LET(
-'    ibVisitNamesArray, TRIM(CLEAN(CHOOSEROWS('[Internal_Budget_25086_Vo_KinLET_vk_v5_19Oct2025.xlsx]Budget Details_P1_Coh1'!$AM$32:$CZ$33, 1))),
-'    sbVisitNamesArray, TRIM(CLEAN(CHOOSEROWS('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$141:$DT$154,1))),
+'    ibVisitNamesArray, TRIM(CLEAN('[Internal_Budget_25086_Vo_KinLET_vk_v5_19Oct2025.xlsx]Budget Details_P1_Coh1'!$AM$32:$CZ$33)),
+'    sbVisitNamesArray, TRIM(CLEAN('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$141:$DT$154)),
 '    sbOnlyVisitNamesArray, UNIQUE(HSTACK(ibVisitNamesArray, ibVisitNamesArray, sbVisitNamesArray), TRUE, TRUE),
 '    sbOnlyVisitNamesArrayEmpty, IFERROR(@sbOnlyVisitNamesArray, TRUE),
 '    uniqueVisitNamesArray, IF(sbOnlyVisitNamesArrayEmpty = TRUE, ibVisitNamesArray, HSTACK(ibVisitNamesArray, sbOnlyVisitNamesArray)),
@@ -187,8 +188,8 @@ Private Sub SetVisitNamesFormula(toolSheet As Worksheet)
     Dim formula As String
 
     formula = "=LET(" & Chr(10) _
-                    & String(4, Chr(32)) & "ibVisitNamesArray, TRIM(CLEAN(CHOOSEROWS(" & ibVisitNamesRange & ", 1)))," & Chr(10) _
-                    & String(4, Chr(32)) & "sbVisitNamesArray, TRIM(CLEAN(CHOOSEROWS(" & sbVisitNamesRange & ",1)))," & Chr(10) _
+                    & String(4, Chr(32)) & "ibVisitNamesArray, TRIM(CLEAN(" & ibVisitNamesRange & "))," & Chr(10) _
+                    & String(4, Chr(32)) & "sbVisitNamesArray, TRIM(CLEAN(" & sbVisitNamesRange & "))," & Chr(10) _
                     & String(4, Chr(32)) & "sbOnlyVisitNamesArray, UNIQUE(HSTACK(ibVisitNamesArray, ibVisitNamesArray, sbVisitNamesArray), TRUE, TRUE)," & Chr(10) _
                     & String(4, Chr(32)) & "sbOnlyVisitNamesArrayEmpty, IFERROR(@sbOnlyVisitNamesArray, TRUE)," & Chr(10) _
                     & String(4, Chr(32)) & "uniqueVisitNamesArray, IF(sbOnlyVisitNamesArrayEmpty = TRUE, ibVisitNamesArray, HSTACK(ibVisitNamesArray, sbOnlyVisitNamesArray))," & Chr(10) _
@@ -335,30 +336,33 @@ Private Sub SetGridFormula(row_formula As Integer, _
 'this subroutine writes a formula to add to the top left corner of the grid in section 5
 
 '=LET(
-'    curIdCell, $E500,
-'    curProcedureCell, $G500,
-'    curVisitCell, I$499,
+'    curIdCell, $E119,
+'    curProcedureCell, $G119,
+'    curVisitKeysCells, I$109:I$110,
 '    curNegRateCell,
 '    IF(
 '        ISNUMBER(SEARCH("inr", curIdCell)),
 '        "",
-'        $H500
+'        $H119
 '    ),
 '
-'    IF(OR(AND(curProcedureCell = "", curIdCell = ""), curVisitCell = ""),
+'    IF(OR(AND(curProcedureCell = "", curIdCell = ""),CONCAT(curVisitKeysCells) = ""),
 '        "",
 '        LET(
 '            curId, TRIM(CLEAN(curIdCell)),
 '            curProcedure, TRIM(CLEAN(curProcedureCell)),
 '            curIdProcedure, LEFT(curId & curProcedure, 255),
-'            curVisit, TRIM(CLEAN(curVisitCell)),
-'            dataRange, '[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$142:$DT$283,
-'            idRange, TRIM(CLEAN('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$DV$142:$DV$283)),
-'            procedureRange, TRIM(CLEAN('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$B$142:$B$283)),
+'            curVisitKeys, TRIM(CLEAN(curVisitKeysCells)),
+'            dataRange, '[Internal_Budget_25086_Vo_KinLET_vk_v8_24Oct2025.xlsx]Budget Details_P1_Coh1'!$AM$51:$CZ$264,
+'            idRange, TRIM(CLEAN('[Internal_Budget_25086_Vo_KinLET_vk_v8_24Oct2025.xlsx]Budget Details_P1_Coh1'!$N$51:$N$264)),
+'            procedureRange, TRIM(CLEAN('[Internal_Budget_25086_Vo_KinLET_vk_v8_24Oct2025.xlsx]Budget Details_P1_Coh1'!$R$51:$R$264)),
 '            idProcedureRange, LEFT(idRange & procedureRange, 255),
-'            visitRange, TRIM(CLEAN(CHOOSEROWS('[25086 Sponsor Budget draft_vk_v5_19Oct25.xlsx]United States-Cohort 1'!$G$141:$DT$154, 1))),
+'            visitRange, TRIM(CLEAN('[Internal_Budget_25086_Vo_KinLET_vk_v8_24Oct2025.xlsx]Budget Details_P1_Coh1'!$AM$32:$CZ$33)),
 '            indexRow, MATCH(curIdProcedure, idProcedureRange, 0),
-'            indexColumn, MATCH(curVisit, visitRange, 0),
+'            matchMatrix, (curVisitKeys = visitRange) * 1,
+'            matchMatrixTotals, MMULT(TRANSPOSE(matchMatrix), SEQUENCE(ROWS(matchMatrix),1,1,0)),
+'            requiredMatchTotal, ROWS(visitRange),
+'            indexColumn, MATCH(requiredMatchTotal, matchMatrixTotals, 0),
 '            curTimePoint, INDEX(dataRange, indexRow, indexColumn),
 '            rawOutput,
 '            IF(
@@ -402,20 +406,28 @@ Private Sub SetGridFormula(row_formula As Integer, _
 '        )
 '    )
 ')
+
 'indent     - String(12, Chr(32))
 'new line   - Chr (10)
 'empty string - """" or chr(34) & chr (34)
 
 
     Dim curIdCell, curProcedureCell, curNegRateCell As String
-    Dim curVisitCell As String
+    Dim curVisitKeysCells As String
+    
+    Dim visitsRng As Range   'visit name range to get number of rows
+    Dim rowCount As Long
     
     With toolSheet
         curIdCell = .Cells(row_formula, column_idsFormula).Address(RowAbsolute:=False)
         curProcedureCell = .Cells(row_formula, column_proceduresFormula).Address(RowAbsolute:=False)
         curNegRateCell = .Cells(row_formula, column_negRatesFormula).Address(RowAbsolute:=False)
         
-        curVisitCell = .Cells(row_formula - 1, column_gridTopLeftFormula).Address(columnabsolute:=False)
+        Set visitsRng = .Cells(row_visitNamesFormula, column_visitNamesFormula).SpillingToRange
+        rowCount = visitsRng.Rows.count  ' Returns total rows in the dynamic spill
+        
+        curVisitKeysCells = .Cells(row_formula - row_sectionFiveShift, column_gridTopLeftFormula).Resize(rowCount, 1).Address(columnabsolute:=False)
+        
     End With
     
     Dim idRange As String
@@ -433,7 +445,7 @@ Private Sub SetGridFormula(row_formula As Integer, _
     formula = "=LET(" & Chr(10) _
                 & String(4, Chr(32)) & "curIdCell, " & curIdCell & "," & Chr(10) _
                 & String(4, Chr(32)) & "curProcedureCell, " & curProcedureCell & "," & Chr(10) _
-                & String(4, Chr(32)) & "curVisitCell, " & curVisitCell & "," & Chr(10) _
+                & String(4, Chr(32)) & "curVisitKeysCells, " & curVisitKeysCells & "," & Chr(10) _
                 & String(4, Chr(32)) & "curNegRateCell, " & Chr(10) _
                 & String(4, Chr(32)) & "IF(" & Chr(10) _
                     & String(8, Chr(32)) & "ISNUMBER(SEARCH(""inr"", curIdCell))," & Chr(10) _
@@ -441,7 +453,7 @@ Private Sub SetGridFormula(row_formula As Integer, _
                     & String(8, Chr(32)) & curNegRateCell & Chr(10) _
                 & String(4, Chr(32)) & ")," & Chr(10) _
                 & Chr(10) _
-                & String(4, Chr(32)) & "IF(OR(AND(curProcedureCell = """", curIdCell = """"), curVisitCell = """")," & Chr(10) _
+                & String(4, Chr(32)) & "IF(OR(AND(curProcedureCell = """", curIdCell = """"), CONCAT(curVisitKeysCells) = """")," & Chr(10) _
                     & String(8, Chr(32)) & """"" ," & Chr(10) _
                     & String(8, Chr(32)) & "LET(" & Chr(10)
     
@@ -449,14 +461,17 @@ Private Sub SetGridFormula(row_formula As Integer, _
                     & String(12, Chr(32)) & "curId, TRIM(CLEAN(curIdCell))," & Chr(10) _
                     & String(12, Chr(32)) & "curProcedure, TRIM(CLEAN(curProcedureCell))," & Chr(10) _
                     & String(12, Chr(32)) & "curIdProcedure, LEFT(curId & curProcedure, 255)," & Chr(10) _
-                    & String(12, Chr(32)) & "curVisit, TRIM(CLEAN(curVisitCell))," & Chr(10) _
+                    & String(12, Chr(32)) & "curVisitKeys, TRIM(CLEAN(curVisitKeysCells))," & Chr(10) _
                     & String(12, Chr(32)) & "dataRange, " & dataRange & "," & Chr(10) _
                     & String(12, Chr(32)) & "idRange, TRIM(CLEAN(" & idRange & "))," & Chr(10) _
                     & String(12, Chr(32)) & "procedureRange, TRIM(CLEAN(" & procedureRange & "))," & Chr(10) _
                     & String(12, Chr(32)) & "idProcedureRange, LEFT(idRange & procedureRange, 255)," & Chr(10) _
-                    & String(12, Chr(32)) & "visitRange, TRIM(CLEAN(CHOOSEROWS(" & visitRange & ", 1)))," & Chr(10) _
+                    & String(12, Chr(32)) & "visitRange, TRIM(CLEAN(" & visitRange & "))," & Chr(10) _
                     & String(12, Chr(32)) & "indexRow, MATCH(curIdProcedure, idProcedureRange, 0)," & Chr(10) _
-                    & String(12, Chr(32)) & "indexColumn, MATCH(curVisit, visitRange, 0)," & Chr(10) _
+                    & String(12, Chr(32)) & "matchMatrix, (curVisitKeys = visitRange) * 1," & Chr(10) _
+                    & String(12, Chr(32)) & "matchMatrixTotals, MMULT(TRANSPOSE(matchMatrix), SEQUENCE(ROWS(matchMatrix),1,1,0))," & Chr(10) _
+                    & String(12, Chr(32)) & "requiredMatchTotal, ROWS(visitRange)," & Chr(10) _
+                    & String(12, Chr(32)) & "indexColumn, MATCH(requiredMatchTotal, matchMatrixTotals, 0)," & Chr(10) _
                     & String(12, Chr(32)) & "curTimePoint, INDEX(dataRange, indexRow, indexColumn)," & Chr(10)
                     
     formula = formula _
@@ -845,5 +860,7 @@ Private Sub AdjustIdsProceduresNegRatesRanges(column_allComponents As Integer, _
     End With
     
 End Sub
+
+
 
 
