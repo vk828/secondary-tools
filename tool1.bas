@@ -1,8 +1,8 @@
 Attribute VB_Name = "tool1"
 ' [VK 16July2023] tool1_ConvBillingGridToCAorIB was developed by
-' Vadim Krifuks in close collaboration with Man Ming Tse, Hui Zeng, and other HT2 Team members
+' Vadim Krifuks in close collaboration with Man Ming Tse, Hui Zeng, and other AT2 Team members
 ' a few functions that open/close file were copied from OCTA Internal Budget template file
-' Last Updated: 24 November 2025
+' Last Updated: 13 Dec 2025
 
 Option Explicit
 
@@ -355,7 +355,7 @@ Sub ZoomAndFreezePanes(curSheet As Worksheet, r As Integer, c As Integer)
 End Sub
 
 Sub SaveWB(destinationSheet As Worksheet, sourceSheet As Worksheet, destinationRangeFileName As Range, destinationRangeProtocolInfo As Range)
-'this subroutine
+'this subroutine attempts to save the file in the folder of the billing grid file with a uniform name
 
     Dim ProtocolNo As String
     Dim PI As String
@@ -465,10 +465,14 @@ Sub SaveWB(destinationSheet As Worksheet, sourceSheet As Worksheet, destinationR
     
     On Error GoTo SkipSave
         'Save the file
-        ActiveWorkbook.SaveAs fileName:=ActiveWorkbook.Path & "\" & fileName & ".xlsx", FileFormat:=xlOpenXMLWorkbook 'updated from FileFormat:=xlWorkbookDefault to allow save on Mac 1/18/21
+        ActiveWorkbook.SaveAs fileName:=Utilities.GetLocalPath(ActiveWorkbook) & "\" & fileName & ".xlsx", FileFormat:=xlOpenXMLWorkbook 'updated from FileFormat:=xlWorkbookDefault to allow save on Mac 1/18/21
         Exit Sub
 SkipSave:
-    MsgBox ("Renaming and saving the original file " & fileNameBG & " to " & fileName & " was skipped. Please rename/save the file manually before closing.")
+    MsgBox ("Saving the original file " & Chr(10) & Chr(10) & _
+            "'" & fileNameBG & "'" & Chr(10) & Chr(10) & _
+            "As" & Chr(10) & Chr(10) & _
+            "'" & fileName & ".xlsx'" & Chr(10) & Chr(10) & _
+            "was skipped. Please rename and save the file manually before closing.")
     
 End Sub
 
@@ -1143,7 +1147,11 @@ Sub BillingGridToCAFileConverter(ByRef designationsArray() As String, _
                                                 '4)extract Event Codes,
                                                 '5)add IDs for sorting rows
     
+    'open a billing grid file
     Call Utilities.OpenNewWorkbook
+    
+    'turn billing grid file autosave off
+    Call Utilities.SetWorkbookAutoSave(ActiveWorkbook, False)
     
     Set wb = ActiveWorkbook
     

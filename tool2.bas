@@ -62,7 +62,7 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     ib_gridRng.Worksheet.Activate
 
     'turn off internal budget autosave
-    Call Utilities.TurnOffAutosave(ib_gridRng.Worksheet.Parent)
+    Call Utilities.SetWorkbookAutoSave(ib_gridRng.Worksheet.Parent, False)
 
     '### STEP 2 ###
     'check Visit and Procedure ranges for duplicates
@@ -268,7 +268,8 @@ End Function
  
 Private Function isPrevInvoiceCurrOne(prev As Variant, curr As Variant) As Boolean
 
-    If StrComp(CStr(prev), "inv", vbTextCompare) = 0 And IsNumeric(curr) Then
+    If (StrComp(CStr(prev), "inv", vbTextCompare) = 0 Or StrComp(CStr(prev), "invc", vbTextCompare) = 0) _
+        And IsNumeric(curr) Then
         If CInt(curr) = 1 Then
             isPrevInvoiceCurrOne = True
         Else

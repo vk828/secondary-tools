@@ -1,6 +1,7 @@
 Attribute VB_Name = "tool2_oncore"
 'Author/Developer: Vadim Krifuks
-'Last Updated: September 2025
+'Collaborators: Man Ming Tse
+'Last Updated: 13 December 2025
 
 Option Explicit
 Option Private Module
@@ -25,6 +26,9 @@ Function GetOncoreRanges(ibSheetName As String) As Collection
     'STEP1: open file
     'exit Sub if system didn't open Billing Grid
     If OpenFileWithStatus = -1 Then Exit Function
+    
+    'turn billing grid file autosave off
+    Call Utilities.SetWorkbookAutoSave(ActiveWorkbook, False)
     
     Set wbOncore = ActiveWorkbook
     

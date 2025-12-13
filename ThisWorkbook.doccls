@@ -2,7 +2,7 @@
 
 Private Sub Workbook_Open()
 'this subroutine will turn off AutoSave automatically each time the workbook is opened.
-
+    On Error Resume Next
     If Val(Application.Version) > 15 Then
         If ActiveWorkbook.AutoSaveOn Then ActiveWorkbook.AutoSaveOn = False
     End If

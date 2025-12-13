@@ -1,6 +1,6 @@
 Attribute VB_Name = "Utilities"
 'Author/Developer: Vadim Krifuks
-'Last Updated: 19 November 2025
+'Last Updated: 13 Dec 2025
 
 Option Explicit
 Option Private Module
@@ -399,10 +399,21 @@ Sub SwitchActiveSheet(rng As Range)
 
 End Sub
 
-Sub TurnOffAutosave(wkb As Workbook)
-'sub to turn off autosave
-
+' this sub sets workbook's AutoSave feature
+Sub SetWorkbookAutoSave(wb As Workbook, ByVal EnableAutoSave As Boolean)
+    On Error Resume Next
     If Val(Application.Version) > 15 Then
-        If wkb.AutoSaveOn Then wkb.AutoSaveOn = False
+        wb.AutoSaveOn = EnableAutoSave
     End If
 End Sub
+
+' wb.Path might provide cloud path. This function corrects the issue
+Function GetLocalPath(wb As Workbook) As String
+    If Left(wb.Path, 8) = "https://" Then
+        GetLocalPath = Environ("OneDriveCommercial") & _
+            Replace(Mid(wb.Path, InStr(wb.Path, "/Documents/") + 10), "/", "\")
+    Else
+        GetLocalPath = wb.Path
+    End If
+End Function
+

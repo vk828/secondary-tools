@@ -1,5 +1,6 @@
 Attribute VB_Name = "tool2_cases"
 'Author/Developer: Vadim Krifuks
+'Collaborators: Man Ming Tse
 'Last Updated: 22 September 2025
 
 Option Explicit

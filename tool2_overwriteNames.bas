@@ -1,5 +1,6 @@
 Attribute VB_Name = "tool2_overwriteNames"
 'Author/Developer: Vadim Krifuks
+'Collaborators: Man Ming Tse
 'Last Updated: 1 Novermber 2025
 
 Option Explicit

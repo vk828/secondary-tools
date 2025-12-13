@@ -1,5 +1,6 @@
 Attribute VB_Name = "tool2_duplicates"
 'Author/Developer: Vadim Krifuks
+'Collaborators: Man Ming Tse
 'Last Updated: 30 September 2025
 
 Option Explicit
