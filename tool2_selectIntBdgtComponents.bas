@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool2_selectIntBdgtComponents"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 25 October 2025
+'Last Updated: 13 October 2026
 
 Option Explicit
 Option Private Module

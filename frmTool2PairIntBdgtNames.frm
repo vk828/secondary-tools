@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 Private terminateFlag As Boolean 'initialized to false
@@ -65,7 +66,7 @@ Private Sub btnExit_Click()
 End Sub
 
 Private Sub btnReportUnpaired_Click()
-    Call tool2_overwriteNames.ReportUnpaired
+    'Call tool2_overwriteNames.ReportUnpaired
 End Sub
 
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)

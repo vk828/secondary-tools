@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool2"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 19 November 2025
+'Last Updated: 13 October 2026
 
 Option Explicit
 
@@ -18,6 +18,27 @@ Const row_proceduresRange As Integer = row_workbookName + 2
 Const row_visitNamesRange As Integer = row_workbookName + 3
 Const row_dataRange As Integer = row_workbookName + 4
 
+' ib_visitsArray has five rows:
+' row1 - segment name
+' row2 - visit name
+' row3 - visit-segment combination
+' row4 - an absolute column number on a sheet where a visit is located
+' row5 - an absolute column number on oncore billing grid where a corresponding visit is located;
+'       0 means there is no corresponding visit in OnCore
+'       -1 means that visit-segment combination = "" which means that a column is not a visit
+Dim ib_visitsArray() As Variant
+
+' oncore_visitsArray has five rows:
+' row1 - segment name
+' row2 - visit name
+' row3 - visit-segment combination
+' row4 - an absolute column number on a sheet where a visit is located
+' row5 - 1 means a visit has a match on the internal budget; 0 means the visit doesn't have a match
+Dim oncore_visitsArray() As Variant
+
+Dim ib_visitsRow As Integer
+Dim oncore_visitsRow As Integer
+
 'sheet where the tool is located
 Dim toolSheet As Worksheet
 
@@ -32,6 +53,14 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     'OnCore ranges
     Dim rngCollection As New Collection         'collection of oncore ranges that
     Dim oncore_visitsRng As Range, oncore_proceduresRng As Range, oncore_gridRng As Range
+      
+    Dim i As Integer
+    Dim j As Integer
+    Dim totalVisits As Integer
+    Dim currCell As Range
+    Dim visitName As String
+    Dim segmentName As String
+    Dim combinedSegmentVisitName As String
       
     'the assumption is that a user calls the program by clicking a button
     'located on the tool sheet
@@ -74,6 +103,41 @@ Sub tool2_UpdateIntBdgtGridToOncore()
                 & "these duplicates and rerun the tool. Thank you.")
         Exit Sub
     End If
+    
+'********** ADDED on 12Oct26 Start
+    
+    ' number of visits selected
+    totalVisits = ib_visitsRng.Cells.count
+    
+    ' resize array
+    ReDim ib_visitsArray(1 To 5, 1 To totalVisits)
+    
+    ib_visitsRow = ib_visitsRng.Row
+    
+    ' populate Internal Budget Visits array
+    For Each currCell In ib_visitsRng
+    
+        segmentName = currCell.Offset(-1, 0).value
+        visitName = currCell.value
+        
+        If (segmentName = "" And visitName = "") Then
+            combinedSegmentVisitName = ""
+        ElseIf segmentName = "" Then
+            combinedSegmentVisitName = visitName
+        Else
+            combinedSegmentVisitName = visitName & " " & Split(segmentName, Chr(10))(0)
+        End If
+
+        j = j + 1
+        ib_visitsArray(1, j) = segmentName
+        ib_visitsArray(2, j) = visitName
+        ib_visitsArray(3, j) = combinedSegmentVisitName
+        ib_visitsArray(4, j) = currCell.column
+        ib_visitsArray(5, j) = 0
+        
+    Next currCell
+
+'********** ADDED on 12Oct26 End
 
     '### STEP 3 ###
     'convert billing grid to internal budget grid type and get ONCORE RANGES
@@ -86,25 +150,71 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     Set oncore_visitsRng = rngCollection(2)
     Set oncore_gridRng = rngCollection(3)
     
+'********** ADDED on 12Oct26 Start
+    
+    ' number of visits selected
+    totalVisits = oncore_visitsRng.Cells.count
+    
+    ' resize array
+    ReDim oncore_visitsArray(1 To 5, 1 To totalVisits)
+    
+    oncore_visitsRow = oncore_visitsRng.Row
+    
+    ' populate OnCore Visits array
+    j = 0 'reset counter
+    For Each currCell In oncore_visitsRng
+    
+        j = j + 1
+        
+        segmentName = currCell.Offset(-1, 0).value
+        visitName = currCell.value
+        
+        ' fill missing segment names
+        If visitName <> "" And segmentName = "" Then
+            segmentName = oncore_visitsArray(1, j - 1)
+        End If
+        
+        If (segmentName = "" And visitName = "") Then
+            combinedSegmentVisitName = ""
+        ElseIf segmentName = "" Then
+            combinedSegmentVisitName = visitName
+        Else
+            combinedSegmentVisitName = visitName & " " & Split(segmentName, Chr(10))(0)
+        End If
+
+        oncore_visitsArray(1, j) = segmentName
+        oncore_visitsArray(2, j) = visitName
+        oncore_visitsArray(3, j) = combinedSegmentVisitName
+        oncore_visitsArray(4, j) = currCell.column
+        oncore_visitsArray(5, j) = 0
+        
+    Next currCell
+
+'********** ADDED on 12Oct26 End
+    
     '### STEP 4 ###
     'update visit and procedure names on the internal budget
     'exit sub if user terminates the program by clicking 'Exit'
     If tool2_overwriteNames.OverwriteProcedureAndVisitNames(ib_proceduresRng, _
-                                                            ib_visitsRng, _
+                                                            ib_visitsArray, _
                                                             oncore_proceduresRng, _
+                                                            oncore_visitsArray, _
+                                                            ib_visitsRng, _
                                                             oncore_visitsRng) Then Exit Sub
     '### STEP 5 ###
     'process internal budget grid
-    Call ProcessGrids(ib_visitsRng, _
-                            ib_proceduresRng, _
-                            ib_gridRng, _
-                            oncore_visitsRng, _
-                            oncore_proceduresRng, _
-                            oncore_gridRng)
+    Call ProcessGrids(ib_visitsArray, _
+                        ib_visitsRng, _
+                        ib_proceduresRng, _
+                        ib_gridRng, _
+                        oncore_visitsRng, _
+                        oncore_proceduresRng, _
+                        oncore_gridRng)
 
 End Sub
 
-Private Sub ProcessGrids(ib_visitsRng As Range, _
+Private Sub ProcessGrids(ib_visitsArray() As Variant, _
+                            ib_visitsRng As Range, _
                             ib_proceduresRng As Range, _
                             ib_gridRng As Range, _
                             oncore_visitsRng As Range, _
@@ -145,14 +255,13 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
     
     ReDim visitNotFoundArray(1 To ib_visitsRng.count)      'set a size of the array; all elements are initialized to False
     
-    Dim hCell As Range, vCell As Range
-    Dim visitNumber As Integer
+    Dim hCell As Range
+    Dim i As Integer
     
     'loop through procedures on internal budget
     'For ib_currRow = 1 To ib_rows
     For Each hCell In ib_proceduresRng
         
-        visitNumber = 1
         ib_currRow = hCell.Row
         
         'procedure name from internal budget
@@ -170,34 +279,34 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
             GoTo nextProcedure
         End If
         
+        'make oncore_currRow an absolute row not a relative to procedure range
+        oncore_currRow = oncore_currRow + 4
+        
         'loop through visits on internal budget
-        For Each vCell In ib_visitsRng
+        For i = 1 To UBound(ib_visitsArray, 2)
             
-            ib_currColumn = vCell.column
-            
-            'visit name from internal budget
-            visitName = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(vCell.value))
-            
+            ib_currColumn = ib_visitsArray(4, i)
+                        
             'find column where the internal budget visit is located on oncore document
             'if not found, Application.Match returns CVErr
-            oncore_currColumn = Application.Match(visitName, oncore_visitsRng, 0)
+            oncore_currColumn = ib_visitsArray(5, i)
             
             'if visit is not found
-            If IsError(oncore_currColumn) Then
+            If oncore_currColumn < 1 Then
                 
                 'process this one time per visit ONLY
-                If visitNotFoundArray(visitNumber) = False Then
-                    Call tool2_cases.VisitNotFound(vCell, _
+                If visitNotFoundArray(i) = False Then
+                    Call tool2_cases.VisitNotFound(ib_visitsRng.Cells(i), _
                             Application.Intersect(ib_gridRng, ib_gridRng.Worksheet.Columns(ib_currColumn)), _
                             fillColor_differentFromOncore)
-                    visitNotFoundArray(visitNumber) = True
+                    visitNotFoundArray(i) = True
                 End If
                 
                 GoTo nextVisit
             End If
             
             ib_value = ib_gridRng.Worksheet.Cells(ib_currRow, ib_currColumn).value
-            oncore_value = oncore_gridRng.Cells(oncore_currRow, oncore_currColumn).value
+            oncore_value = oncore_gridRng.Worksheet.Cells(oncore_currRow, oncore_currColumn).value
 
             'case1 - ib = "" and oncore = ""
             If ib_value = "" And oncore_value = "" Then
@@ -214,8 +323,10 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
 
                 Call tool2_cases.PrevNothingCurrX(ib_gridRng.Worksheet.Cells(ib_currRow, ib_currColumn), fillColor_updatedToOncore, ib_value, oncore_value)
 
-            'case4 - ib = "inv" or "effort" and oncore = 1
-            ElseIf isPrevEffortCurrOne(ib_value, oncore_value) Or isPrevInvoiceCurrOne(ib_value, oncore_value) Then
+            'case4 - ib = "inv/invc" or "effort" or "hhn/hh" and oncore = 1
+            ElseIf isPrevEffortCurrOne(ib_value, oncore_value) Or _
+                    isPrevInvoiceCurrOne(ib_value, oncore_value) Or _
+                    isPrevHHNCurrOne(ib_value, oncore_value) Then
 
                 Call tool2_cases.PrevEquivalentToOneCurrOne(ib_gridRng.Worksheet.Cells(ib_currRow, ib_currColumn), fillColor_sameValue, ib_value, oncore_value)
 
@@ -223,7 +334,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
             Else
             
                 If tool2_cases.PrevXCurrY(ib_gridRng.Worksheet.Cells(ib_currRow, ib_currColumn), _
-                                            oncore_gridRng.Cells(oncore_currRow, oncore_currColumn), _
+                                            oncore_gridRng.Worksheet.Cells(oncore_currRow, oncore_currColumn), _
                                             visitName, _
                                             procedureName, _
                                             fillColor_updatedToOncore, _
@@ -236,8 +347,7 @@ Private Sub ProcessGrids(ib_visitsRng As Range, _
             
             End If
 nextVisit:
-        visitNumber = visitNumber + 1
-        Next vCell
+        Next i
     
 nextProcedure:
     Next hCell
@@ -277,6 +387,21 @@ Private Function isPrevInvoiceCurrOne(prev As Variant, curr As Variant) As Boole
         End If
     Else
         isPrevInvoiceCurrOne = False
+    End If
+
+End Function
+
+Private Function isPrevHHNCurrOne(prev As Variant, curr As Variant) As Boolean
+
+    If (StrComp(CStr(prev), "hhn", vbTextCompare) = 0 Or StrComp(CStr(prev), "hh", vbTextCompare) = 0) _
+        And IsNumeric(curr) Then
+        If CInt(curr) = 1 Then
+            isPrevHHNCurrOne = True
+        Else
+            isPrevHHNCurrOne = False
+        End If
+    Else
+        isPrevHHNCurrOne = False
     End If
 
 End Function

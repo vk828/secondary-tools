@@ -2,7 +2,7 @@ Attribute VB_Name = "tool1"
 ' [VK 16July2023] tool1_ConvBillingGridToCAorIB was developed by
 ' Vadim Krifuks in close collaboration with Man Ming Tse, Hui Zeng, and other AT2 Team members
 ' a few functions that open/close file were copied from OCTA Internal Budget template file
-' Last Updated: 13 Dec 2025
+' Last Updated: 15 Dec 2025
 
 Option Explicit
 
@@ -501,7 +501,7 @@ End Function
 Sub CopyRenameSheet(sourceSheet As Worksheet, destinationPlace As Worksheet, renamedSheetName As String)
 'this subroutine copies a sheet to a workbook and renames it
 
-    sourceSheet.Copy Before:=destinationPlace
+    sourceSheet.Copy before:=destinationPlace
     destinationPlace.Parent.Worksheets(sourceSheet.name).name = renamedSheetName
 
 
@@ -564,9 +564,9 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     numberOfVisits = armLastVisitColumn - armFirstVisitColumn + 1
     
     ' All elements are initialized to by default to an empty string ""
-    Dim segmentNamesArray As Variant
-    Dim visitNamesArray As Variant
-    ReDim synkVisitNamesArray(1 To numberOfVisits) As String
+    ReDim segmentNamesArray(1 To 1, 1 To numberOfVisits) As Variant
+    ReDim visitNamesArray(1 To 1, 1 To numberOfVisits) As Variant
+    ReDim synkVisitNamesArray(1 To 1, 1 To numberOfVisits) As String
 
     With curSheet
         Set rng = .Range(.Cells(synkRow, armFirstVisitColumn), .Cells(synkRow, armLastVisitColumn))
@@ -582,7 +582,13 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     'remove footnotes
     Call Utilities.RemoveFootnotesFromSelectedRange(rng)
     'copy segment names into array
-    segmentNamesArray = rng.value
+    'when numberOfVisits = 1, it is a special case
+    If numberOfVisits = 1 Then
+        segmentNamesArray(1, 1) = rng.value
+    Else
+        segmentNamesArray = rng.value
+    End If
+    
     
     For i = 1 To numberOfVisits
         
@@ -609,13 +615,17 @@ Sub AddSynkVisitNames(curSheet As Worksheet, curSheetName As String, synkRow As 
     Application.CutCopyMode = False 'empties clipboard after copying
     'remove footnotes
     Call Utilities.RemoveFootnotesFromSelectedRange(rng)
-    'copy segment names into array
-    visitNamesArray = rng.value
-            
+    'copy visit names into array
+    'when numberOfVisits = 1, it is a special case
+    If numberOfVisits = 1 Then
+        visitNamesArray(1, 1) = rng.value
+    Else
+        visitNamesArray = rng.value
+    End If
+
     'STEP 3 - prepare synk visit names
     For i = 1 To numberOfVisits
-        synkVisitNamesArray(i) = visitNamesArray(1, i) & " " & segmentNamesArray(1, i)
-    
+        synkVisitNamesArray(1, i) = CStr(visitNamesArray(1, i)) & " " & CStr(segmentNamesArray(1, i))
     Next i
         
         

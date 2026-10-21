@@ -24,7 +24,7 @@ Public Property Let IgnoreEvents(value As Boolean)
     bIgnoreEvents = value
 End Property
 
-Private Sub btnDone_Click()
+Private Sub btnSubmit_Click()
     If (Me.cboFileName.value <> "" And Me.cboSheetName.value <> "" And _
         Me.tbxProceduresRange.value <> "" And Me.tbxVisitsRange.value <> "") Then
     
@@ -136,7 +136,11 @@ Function GetSelectedRangeAddress(intersectWithFirstRow As Boolean, intersectWith
     Set rng = Application.InputBox("Select a range", "Range Selection", Type:=8)
     On Error GoTo 0
     If Not rng Is Nothing Then
+        
+        ' check that selected range belongs to the selected workbook and worksheet
         If rng.Worksheet.Parent.name = Me.cboFileName.value And rng.Worksheet.name = Me.cboSheetName.value Then
+            
+            ' force range to be a single row or column
             If intersectWithFirstRow Then
                 Set rng = Application.Intersect(rng, rng.Cells(1, 1).EntireRow)
             ElseIf intersectWithFirstColumn Then
@@ -154,8 +158,8 @@ End Function
 
 Private Sub CheckIfReady()
     If Len(Me.tbxProceduresRange.Text) > 0 And Len(Me.tbxVisitsRange.Text) > 0 Then
-        Me.btnDone.Enabled = True
+        Me.btnSubmit.Enabled = True
     Else
-        Me.btnDone.Enabled = False
+        Me.btnSubmit.Enabled = False
     End If
 End Sub

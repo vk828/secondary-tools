@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool2_cases"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 22 September 2025
+'Last Updated: 13 October 2026
 
 Option Explicit
 Option Private Module
@@ -22,13 +22,16 @@ End Sub
 
 Sub VisitNotFound(visitRng As Range, gridColRng As Range, fillColor As Long)
 
-    If Not (AreAllCellsEmpty(visitRng) And AreAllCellsEmpty(gridColRng)) Then
+    If Not (AreAllCellsEmpty(visitRng) And AreAllCellsEmpty(visitRng.Offset(-1, 0)) _
+            And AreAllCellsEmpty(gridColRng)) Then
         Dim msg As String
-        msg = AssembleComment("visit not found in OnCore; column skipped")
+        msg = AssembleComment("visit segment combination not found in OnCore; column skipped")
     
         Call AddComment(visitRng, msg)
+        Call AddComment(visitRng.Offset(-1, 0), msg)
         
         visitRng.Interior.color = fillColor
+        visitRng.Offset(-1, 0).Interior.color = fillColor
         gridColRng.Interior.color = fillColor
     End If
 

@@ -1,7 +1,7 @@
 Attribute VB_Name = "tool2_duplicates"
 'Author/Developer: Vadim Krifuks
 'Collaborators: Man Ming Tse
-'Last Updated: 30 September 2025
+'Last Updated: 13 October 2026
 
 Option Explicit
 Option Private Module
@@ -12,14 +12,14 @@ Function FindAndHighlightDuplicatesTwoRanges(proceduresRng As Range, visitsRng A
     Dim areProceduresRepeat As Boolean
     Dim areVisitsRepeat As Boolean
     
-    areProceduresRepeat = FindAndHighlightDuplicates(proceduresRng)
-    areVisitsRepeat = FindAndHighlightDuplicates(visitsRng)
+    areProceduresRepeat = FindAndHighlightProcedureDuplicates(proceduresRng)
+    areVisitsRepeat = FindAndHighlightVisitDuplicates(visitsRng)
 
     If areProceduresRepeat Or areVisitsRepeat Then FindAndHighlightDuplicatesTwoRanges = True
 
 End Function
 
-Private Function FindAndHighlightDuplicates(rng As Range) As Boolean
+Private Function FindAndHighlightProcedureDuplicates(rng As Range) As Boolean
 'this function finds duplicates, highlights them, and returns true if they exist
 
     Dim cell As Range
@@ -58,5 +58,69 @@ Private Function FindAndHighlightDuplicates(rng As Range) As Boolean
         End If
     Next cell
 
-    FindAndHighlightDuplicates = duplicateFound
+    FindAndHighlightProcedureDuplicates = duplicateFound
+End Function
+
+Private Function FindAndHighlightVisitDuplicates(rng As Range) As Boolean
+'this function finds duplicates, highlights them, and returns true if they exist
+
+    Dim visitCell As Range
+    Dim dict As Object
+    Dim visitName As String
+    Dim segmentName As String
+    Dim combinedSegmentVisitName As String
+    Dim duplicateFound As Boolean
+    
+    'late binding dictionary
+    Set dict = CreateObject("Scripting.Dictionary")
+    
+    duplicateFound = False
+    
+    ' Count occurrences of cleaned & trimmed values
+    For Each visitCell In rng
+        If Not IsEmpty(visitCell.value) Then
+            visitName = visitCell.value
+            segmentName = visitCell.Offset(-1, 0).value
+            If segmentName = "" Then
+                combinedSegmentVisitName = visitName
+            Else
+                combinedSegmentVisitName = visitName & " " & Split(segmentName, Chr(10))(0)
+            End If
+                
+            combinedSegmentVisitName = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(combinedSegmentVisitName))
+            
+            If dict.exists(combinedSegmentVisitName) Then
+                dict(combinedSegmentVisitName) = dict(combinedSegmentVisitName) + 1
+            Else
+                dict.Add combinedSegmentVisitName, 1
+            End If
+        End If
+    Next visitCell
+    
+    ' Highlight cells whose cleaned & trimmed values appear more than once and if so set a return boolean to true
+    For Each visitCell In rng
+        If Not IsEmpty(visitCell.value) Then
+            visitName = visitCell.value
+            segmentName = visitCell.Offset(-1, 0).value
+            
+            If segmentName = "" Then
+                combinedSegmentVisitName = visitName
+            Else
+                combinedSegmentVisitName = visitName & " " & Split(segmentName, Chr(10))(0)
+            End If
+            
+            combinedSegmentVisitName = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(combinedSegmentVisitName))
+            
+            If combinedSegmentVisitName <> "" And dict.exists(combinedSegmentVisitName) Then
+                If dict(combinedSegmentVisitName) > 1 Then
+                    visitCell.Select
+                    visitCell.Interior.color = vbRed
+                    visitCell.Offset(-1, 0).Interior.color = vbRed
+                    duplicateFound = True
+                End If
+            End If
+        End If
+    Next visitCell
+
+    FindAndHighlightVisitDuplicates = duplicateFound
 End Function
