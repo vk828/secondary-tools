@@ -22,22 +22,42 @@ Const row_dataRange As Integer = row_workbookName + 4
 ' row1 - segment name
 ' row2 - visit name
 ' row3 - visit-segment combination
-' row4 - an absolute column number on a sheet where a visit is located
-' row5 - an absolute column number on oncore billing grid where a corresponding visit is located;
+' row4 - an absolute COLUMN number on a sheet where a visit is located
+' row5 - an absolute COLUMN number on oncore billing grid where a corresponding visit is located;
 '       0 means there is no corresponding visit in OnCore
-'       -1 means that visit-segment combination = "" which means that a column is not a visit
+'       -1 means that visit-segment combination = "" which means that a ROW is not a visit
 Dim ib_visitsArray() As Variant
+
+' ib_proceduresArray has five rows:
+' row1 - not used
+' row2 - not used
+' row3 - procedure name
+' row4 - an absolute ROW number on a sheet where a procedure is located
+' row5 - an absolute ROW number on oncore billing grid where a corresponding procedure is located;
+'       0 means there is no corresponding procedure in OnCore
+'       -1 means that procedure = "" which means that a ROW is not a procedure
+Dim ib_proceduresArray() As Variant
 
 ' oncore_visitsArray has five rows:
 ' row1 - segment name
 ' row2 - visit name
 ' row3 - visit-segment combination
-' row4 - an absolute column number on a sheet where a visit is located
+' row4 - an absolute COLUMN number on a sheet where a visit is located
 ' row5 - 1 means a visit has a match on the internal budget; 0 means the visit doesn't have a match
 Dim oncore_visitsArray() As Variant
 
+' oncore_proceduresArray has five rows:
+' row1 - not used
+' row2 - not used
+' row3 - procedure name
+' row4 - an absolute ROW number on a sheet where a visit is located
+' row5 - 1 means a procedure has a match on the internal budget; 0 means the procedure doesn't have a match
+Dim oncore_proceduresArray() As Variant
+
 Dim ib_visitsRow As Integer
+Dim ib_proceduresColumn As Integer
 Dim oncore_visitsRow As Integer
+Dim oncore_proceduresColumn As Integer
 
 'sheet where the tool is located
 Dim toolSheet As Worksheet
@@ -57,10 +77,12 @@ Sub tool2_UpdateIntBdgtGridToOncore()
     Dim i As Integer
     Dim j As Integer
     Dim totalVisits As Integer
+    Dim totalProcedures As Integer
     Dim currCell As Range
     Dim visitName As String
     Dim segmentName As String
     Dim combinedSegmentVisitName As String
+    Dim procedureName As String
       
     'the assumption is that a user calls the program by clicking a button
     'located on the tool sheet
@@ -137,6 +159,27 @@ Sub tool2_UpdateIntBdgtGridToOncore()
         
     Next currCell
 
+    ' number of procedures selected
+    totalProcedures = ib_proceduresRng.Cells.count
+    
+    ' resize array
+    ReDim ib_proceduresArray(1 To 5, 1 To totalProcedures)
+    
+    ib_proceduresColumn = ib_proceduresRng.column
+    
+    ' populate Internal Budget Visits array
+    j = 0 'reset counter
+    For Each currCell In ib_proceduresRng
+    
+        procedureName = currCell.value
+        
+        j = j + 1
+        ib_proceduresArray(3, j) = procedureName
+        ib_proceduresArray(4, j) = currCell.Row
+        ib_proceduresArray(5, j) = 0
+        
+    Next currCell
+
 '********** ADDED on 12Oct26 End
 
     '### STEP 3 ###
@@ -190,16 +233,40 @@ Sub tool2_UpdateIntBdgtGridToOncore()
         
     Next currCell
 
+    ' number of procedures selected
+    totalProcedures = oncore_proceduresRng.Cells.count
+    
+    ' resize array
+    ReDim oncore_proceduresArray(1 To 5, 1 To totalProcedures)
+    
+    oncore_proceduresColumn = oncore_proceduresRng.column
+    
+    ' populate Internal Budget Visits array
+    j = 0 'reset counter
+    For Each currCell In oncore_proceduresRng
+    
+        procedureName = currCell.value
+        
+        j = j + 1
+        oncore_proceduresArray(3, j) = procedureName
+        oncore_proceduresArray(4, j) = currCell.Row
+        oncore_proceduresArray(5, j) = 0
+        
+    Next currCell
+
+
 '********** ADDED on 12Oct26 End
     
     '### STEP 4 ###
     'update visit and procedure names on the internal budget
     'exit sub if user terminates the program by clicking 'Exit'
-    If tool2_overwriteNames.OverwriteProcedureAndVisitNames(ib_proceduresRng, _
+    If tool2_overwriteNames.OverwriteProcedureAndVisitNames(ib_proceduresArray, _
                                                             ib_visitsArray, _
-                                                            oncore_proceduresRng, _
+                                                            oncore_proceduresArray, _
                                                             oncore_visitsArray, _
+                                                            ib_proceduresRng, _
                                                             ib_visitsRng, _
+                                                            oncore_proceduresRng, _
                                                             oncore_visitsRng) Then Exit Sub
     '### STEP 5 ###
     'process internal budget grid

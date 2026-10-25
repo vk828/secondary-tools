@@ -8,7 +8,7 @@ Option Private Module
 
 'forms to pair procedures and visits
 Private frmProcedures As frmTool2PairIntBdgtNames
-Private frmVisits As frmTool2PairIntBdgtVisitNames
+Private frmVisits As frmTool2PairIntBdgtNames
 Private ib_visitsRow As Range
 Private oncore_visitsRow As Range
 
@@ -16,12 +16,14 @@ Private oncore_visitsRow As Range
 'if this workbook is open, variable is NOT nothing
 Private wbReport As Workbook
 
-Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
+Function OverwriteProcedureAndVisitNames(ib_proceduresArray() As Variant, _
                                     ib_visitsArray() As Variant, _
-                                    oncore_proceduresRng As Range, _
+                                    oncore_proceduresArray() As Variant, _
                                     oncore_visitsArray() As Variant, _
-                                    ib_visitsRow As Range, _
-                                    oncore_visitsRow As Range) As Boolean
+                                    ib_proceduresRng As Range, _
+                                    ib_visitsRng As Range, _
+                                    oncore_proceduresRng As Range, _
+                                    oncore_visitsRng As Range) As Boolean
 'function overwrites procedures and visit names and returns true if user decides
 'to terminate the program early, false otherwise
 
@@ -46,13 +48,13 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
     
     '### STEP1 ###
     'get unpaired procedures lists
-    collArray = GetUnpairedLists_Procedures(ib_proceduresRng, oncore_proceduresRng)
+    collArray = GetUnpairedLists(ib_proceduresArray, oncore_proceduresArray)
     Set ib_unpairedProceduresColl = collArray(1)
     Set oncore_unpairedProceduresColl = collArray(2)
     
     '### STEP2 ###
     'get unpaired visits lists
-    collArray = GetUnpairedLists_Visits(ib_visitsArray, oncore_visitsArray)
+    collArray = GetUnpairedLists(ib_visitsArray, oncore_visitsArray)
     Set ib_unpairedVisitsColl = collArray(1)
     Set oncore_unpairedVisitsColl = collArray(2)
     
@@ -63,25 +65,31 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresRng As Range, _
     '### STEP4 ###
     'pass Int Bdgt ranges to the appropriate user forms to enable the program to update names on Int Bdgt
     Set frmProcedures = New frmTool2PairIntBdgtNames
-    Set frmVisits = New frmTool2PairIntBdgtVisitNames
-    Set frmProcedures.RangeToForm = ib_proceduresRng
+    Set frmVisits = New frmTool2PairIntBdgtNames
+'    Set frmProcedures.RangeToForm = ib_proceduresRng
 '    Set frmVisits.RangeToForm = ib_visitsRng
 
     '### STEP5 ###
     'set comboboxes on procedures user form
-    Call frmProcedures.SetCbos(ib_unpairedProceduresColl, _
+    Call frmProcedures.SetCbos(True, _
+                                ib_unpairedProceduresColl, _
                                 oncore_unpairedProceduresColl, _
+                                ib_proceduresArray, _
+                                oncore_proceduresArray, _
+                                ib_proceduresRng, _
+                                oncore_proceduresRng, _
                                 "Update Procedure Names on Internal Budget", _
                                 instrStart & "procedure name(s)" & instrEnd, _
                                 "PROCEED to Pairing Visit Names")
     
     'set comboboxes on visits user form
-    Call frmVisits.SetCbos(ib_unpairedVisitsColl, _
+    Call frmVisits.SetCbos(False, _
+                            ib_unpairedVisitsColl, _
                             oncore_unpairedVisitsColl, _
                             ib_visitsArray, _
                             oncore_visitsArray, _
-                            ib_visitsRow, _
-                            oncore_visitsRow, _
+                            ib_visitsRng, _
+                            oncore_visitsRng, _
                             "Update Visit and Segment Names on Internal Budget", _
                             instrStart & "visit and segment name(s)" & instrEnd, _
                             "PROCEED to Updating Grid")
@@ -111,7 +119,7 @@ SkipVisitNames:
     Else
         'if wbReport exists, update it
         If Not wbReport Is Nothing Then
-            ReportUnpaired oncore_visitsArray
+            ReportUnpaired
         End If
 
         ib_visitsArray = frmVisits.IbArray
@@ -134,7 +142,7 @@ Private Function IsWorkbookOpen(wbName As String) As Boolean
     On Error GoTo 0
 End Function
 
-Sub ReportUnpaired(visitsArray As Variant)
+Sub ReportUnpaired()
 'subroutine creates a workbook and puts unpaired procedures and visits on it
 
     Dim i As Integer
@@ -147,7 +155,9 @@ Sub ReportUnpaired(visitsArray As Variant)
     Dim ws As Worksheet
     Dim note As String
     Dim visitsFirstCell As Range
+    Dim proceduresFirstCell As Range
     Dim totalVisits As Integer
+    Dim totalProcedures As Integer
     
     shUnpairedList = "Unpaired Proc and Visits List"
     shUnpairedMap = "Unpaired - OnCore Map"
@@ -203,11 +213,11 @@ Sub ReportUnpaired(visitsArray As Variant)
         .Cells(2, 2).Resize(2).Merge
         
         For i = 1 To frmProcedures.IbCollection.count
-            .Cells(i + 3, 1).value = frmProcedures.IbCollection(i)
+            .Cells(i + 3, 1).value = frmProcedures.IbArray(3, frmProcedures.IbCollection(i))
         Next i
         
         For i = 1 To frmProcedures.OncoreCollection.count
-            .Cells(i + 3, 2).value = frmProcedures.OncoreCollection(i)
+            .Cells(i + 3, 2).value = frmProcedures.OncoreArray(3, frmProcedures.OncoreCollection(i))
         Next i
         
         .Cells(1, 4).value = "Unpaired Visit Names"
@@ -262,12 +272,35 @@ Sub ReportUnpaired(visitsArray As Variant)
         End With
     End With
     
+    'insert all procedure names from oncore
+    Set proceduresFirstCell = wbReport.Sheets(shUnpairedMap).Cells(4, 1)
+    totalProcedures = UBound(frmProcedures.OncoreArray, 2)
+    
+    With proceduresFirstCell.Resize(totalProcedures, 1)
+        .value = Application.Transpose(Application.index(frmProcedures.OncoreArray, 3, 0))
+        .Font.color = RGB(166, 166, 166)
+        .VerticalAlignment = xlCenter
+        .WrapText = True
+    End With
+    
+    'highlight visit-segment pairs that don't have a pair on internal budget
+    With proceduresFirstCell
+        For i = 1 To totalProcedures
+            If frmProcedures.OncoreArray(5, i) = 0 Then
+                With .Offset(i - 1, 0).Font
+                    .color = vbBlack
+                    .Bold = True
+                End With
+            End If
+        Next i
+    End With
+    
     'insert all visit-segment names from oncore
     Set visitsFirstCell = wbReport.Sheets(shUnpairedMap).Cells(3, 2)
-    totalVisits = UBound(visitsArray, 2)
+    totalVisits = UBound(frmVisits.OncoreArray, 2)
     
     With visitsFirstCell.Offset(-1).Resize(2, totalVisits)
-        .value = visitsArray
+        .value = frmVisits.OncoreArray
         .Font.color = RGB(166, 166, 166)
         .VerticalAlignment = xlCenter
         .WrapText = True
@@ -276,7 +309,7 @@ Sub ReportUnpaired(visitsArray As Variant)
     'highlight visit-segment pairs that don't have a pair on internal budget
     With visitsFirstCell
         For i = 1 To totalVisits
-            If visitsArray(5, i) = 0 Then
+            If frmVisits.OncoreArray(5, i) = 0 Then
                 With .Offset(-1, i - 1).Resize(2, 1).Font
                     .color = vbBlack
                     .Bold = True
@@ -287,13 +320,13 @@ Sub ReportUnpaired(visitsArray As Variant)
     
 End Sub
 
-Private Function CloseAndCleanUp(frmOne As frmTool2PairIntBdgtNames, frmTwo As frmTool2PairIntBdgtVisitNames, rng As Range) As Boolean
+Private Function CloseAndCleanUp(frmOne As frmTool2PairIntBdgtNames, frmTwo As frmTool2PairIntBdgtNames, rng As Range) As Boolean
 'this function conditionally updates 'unpaired report' workbook if it is open, unloads forms, and closes oncore workbook
 'returns true upon completion
     
     'if wbReport exists, update it
     If Not wbReport Is Nothing Then
-        ReportUnpaired frmTwo.OncoreArray
+        ReportUnpaired
     End If
     
     Unload frmOne
@@ -330,7 +363,7 @@ Private Sub ShowModelessFormAndPause(frm As frmTool2PairIntBdgtNames)
     'MsgBox "Form closed, code resumes."
 End Sub
 
-Private Sub ShowModelessFormAndPause_Visits(frm As frmTool2PairIntBdgtVisitNames)
+Private Sub ShowModelessFormAndPause_Visits(frm As frmTool2PairIntBdgtNames)
 'show form
     
     With frm
@@ -353,51 +386,7 @@ Private Sub ShowModelessFormAndPause_Visits(frm As frmTool2PairIntBdgtVisitNames
     'MsgBox "Form closed, code resumes."
 End Sub
 
-Private Function GetUnpairedLists_Procedures(firstRng As Range, secondRng As Range) As Variant
-'this function takes two ranges and returns an array of two collections containing only unpaired items
-
-    Dim cell As Range
-    Dim name As String
-    
-    Dim collArray(1 To 2) As Collection
-    Set collArray(1) = New Collection
-    Set collArray(2) = New Collection
-    
-    Dim collOneItem As String, collTwoItem As String
-    Dim i As Integer, j As Integer
-    
-    'convert range to collection; values are cleaned and trimmed before they are stored in a collection
-    'all "" are skipped
-    For Each cell In firstRng.Cells
-        name = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
-        If name <> "" Then collArray(1).Add name
-    Next cell
-    
-    'convert range to collection; values are cleaned and trimmed before they are stored in a collection
-    'all "" are skipped
-    For Each cell In secondRng.Cells
-        name = Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value))
-        If name <> "" Then collArray(2).Add name
-    Next cell
-    
-    'compare item by item and remove matching pairs from the collections
-    For i = collArray(1).count To 1 Step -1
-        collOneItem = collArray(1).item(i)
-        For j = collArray(2).count To 1 Step -1
-            collTwoItem = collArray(2).item(j)
-            If collOneItem = collTwoItem Then
-                collArray(1).Remove i
-                collArray(2).Remove j
-                Exit For
-            End If
-        Next j
-    Next i
-        
-    GetUnpairedLists_Procedures = collArray
-    
-End Function
-
-Private Function GetUnpairedLists_Visits(ib_visitsArray() As Variant, oncore_visitsArray() As Variant) As Variant
+Private Function GetUnpairedLists(ib_array() As Variant, oncore_array() As Variant) As Variant
 
     Dim cell As Range
     Dim name As String
@@ -412,39 +401,41 @@ Private Function GetUnpairedLists_Visits(ib_visitsArray() As Variant, oncore_vis
     Dim ib_index As Integer
     Dim oncore_index As Integer
     
-    For i = 1 To UBound(ib_visitsArray, 2)
-        name = ib_visitsArray(3, i)
+    For i = 1 To UBound(ib_array, 2)
+        name = ib_array(3, i)
         
         If name = "" Then
             ' a number in row 5 greater than 0 means there is a matching visit in OnCore
             ' -1 means this column is not a visit
-            ib_visitsArray(5, i) = -1
+            ib_array(5, i) = -1
         Else
         
-            For j = 1 To UBound(oncore_visitsArray, 2)
-                If LCase(Trim(name)) = LCase(Trim(oncore_visitsArray(3, j))) Then
+            For j = 1 To UBound(oncore_array, 2)
+                If LCase(Trim(name)) = LCase(Trim(oncore_array(3, j))) Then
                     
                     ' 1 means that this visit has a match on the internal budget
-                    oncore_visitsArray(5, j) = 1
+                    oncore_array(5, j) = 1
                     
                     ' maps column of the matching visit on OnCore
                     ' a number in row 5 greater than 0 means there is a matching visit in OnCore
-                    ib_visitsArray(5, i) = oncore_visitsArray(4, j)
+                    ib_array(5, i) = oncore_array(4, j)
                 End If
             Next j
         End If
     Next i
     
     'build a collection of indices for visits listed on the internal budget that don't have a matching pair on oncore
-    For i = 1 To UBound(ib_visitsArray, 2)
-        If ib_visitsArray(5, i) = 0 Then collArray(1).Add i
+    For i = 1 To UBound(ib_array, 2)
+        If ib_array(5, i) = 0 Then collArray(1).Add i
     Next i
     
     'build a collection of indices for visits listed on oncore that don't have a matching pair on the internal budget
-    For i = 1 To UBound(oncore_visitsArray, 2)
-        If oncore_visitsArray(5, i) = 0 Then collArray(2).Add i
+    For i = 1 To UBound(oncore_array, 2)
+        If oncore_array(5, i) = 0 Then collArray(2).Add i
     Next i
         
-    GetUnpairedLists_Visits = collArray
+    GetUnpairedLists = collArray
 
 End Function
+
+
