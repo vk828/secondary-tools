@@ -13,7 +13,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Explicit
 
 Private terminateFlag As Boolean 'initialized to false
@@ -22,31 +21,61 @@ Private ibRng As Range  'ib range that might have names to be overwritten
 
 Private ibColl As Collection        'collection of unpaired Int Bdgt names
 Private oncoreColl As Collection    'collection of unpaired OnCore names
+Private ibArr As Variant
+Private oncoreArr As Variant
+Private ib_selectedRng As Range
+Private oncore_selectedRng As Range
+Private isProcedure As Boolean
 
-
-Sub SetCbos(collOne As Collection, collTwo As Collection, _
+Sub SetCbos(isProceduresForm As Boolean, ib_collection As Collection, oncore_collection As Collection, _
+            ib_array() As Variant, oncore_array() As Variant, _
+            ib_rng As Range, oncore_rng As Range, _
             frmCaption As String, lblInstructions As String, _
             doneBtnLbl As String)
 'subroutine sets initial comboboxes
 
+    isProcedure = isProceduresForm
+
     Dim item As Variant
     
-    Set ibColl = collOne
-    Set oncoreColl = collTwo
+    Set ibColl = ib_collection
+    Set oncoreColl = oncore_collection
     
     Me.cboIntBdgtName.Clear
     Me.cboOncoreName.Clear
+    
+    ibArr = ib_array
+    oncoreArr = oncore_array
+    
+    Set ib_selectedRng = ib_rng
+    Set oncore_selectedRng = oncore_rng
+    
+    ' Set up Internal Budget ComboBox
+    Me.cboIntBdgtName.ColumnCount = 2
+    Me.cboIntBdgtName.BoundColumn = 1  ' .Value will return the index
+    Me.cboIntBdgtName.TextColumn = 2   ' The textbox part will display the unique visit name
+    Me.cboIntBdgtName.ColumnWidths = "0pt;657pt" ' hides index
+
+    ' Set up OnCore ComboBox
+    Me.cboOncoreName.ColumnCount = 2
+    Me.cboOncoreName.BoundColumn = 1
+    Me.cboOncoreName.TextColumn = 2
+    Me.cboOncoreName.ColumnWidths = "0pt;657pt"
     
     Me.Caption = frmCaption
     Me.lblInstruction = lblInstructions
     Me.btnDone.Caption = doneBtnLbl
 
     For Each item In ibColl
-        Me.cboIntBdgtName.AddItem item
+        Me.cboIntBdgtName.AddItem
+        Me.cboIntBdgtName.List(Me.cboIntBdgtName.ListCount - 1, 0) = item
+        Me.cboIntBdgtName.List(Me.cboIntBdgtName.ListCount - 1, 1) = ibArr(3, item)
     Next item
 
     For Each item In oncoreColl
-        Me.cboOncoreName.AddItem item
+        Me.cboOncoreName.AddItem
+        Me.cboOncoreName.List(Me.cboOncoreName.ListCount - 1, 0) = item
+        Me.cboOncoreName.List(Me.cboOncoreName.ListCount - 1, 1) = oncoreArr(3, item)
     Next item
 
     ' Set cbo view to the first item to avoid empty display
@@ -66,7 +95,7 @@ Private Sub btnExit_Click()
 End Sub
 
 Private Sub btnReportUnpaired_Click()
-    'Call tool2_overwriteNames.ReportUnpaired
+    Call tool2_overwriteNames.ReportUnpaired
 End Sub
 
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
@@ -98,6 +127,14 @@ Public Property Get OncoreCollection() As Collection
     Set OncoreCollection = oncoreColl
 End Property
 
+Public Property Get IbArray() As Variant
+    IbArray = ibArr
+End Property
+
+Public Property Get OncoreArray() As Variant
+    OncoreArray = oncoreArr
+End Property
+
 Private Sub btnDone_Click()
     Me.Hide
 End Sub
@@ -106,83 +143,130 @@ Private Sub btnPairSelected_Click()
 'this sub assumes that there are NO duplicates
 'when 'Pair' button is clicked, this function is called
 
-    Dim ibName As String
-    Dim oncoreName As String
+    Dim ibArrayIndex As String
+    Dim oncoreArrayIndex As String
     Dim cell As Range
-    Dim ibIndex As Integer
-    Dim oncoreIndex As Integer
+    Dim ibCboIndex As Integer
+    Dim oncoreCboIndex As Integer
     
-    ibIndex = Me.cboIntBdgtName.ListIndex
-    oncoreIndex = Me.cboOncoreName.ListIndex
+    ibCboIndex = Me.cboIntBdgtName.ListIndex
+    oncoreCboIndex = Me.cboOncoreName.ListIndex
     
     'if something is selected in both comboboxes, remove these items
-    If ibIndex <> -1 And oncoreIndex <> -1 Then
+    If ibCboIndex <> -1 And oncoreCboIndex <> -1 Then
         
-        ibName = Me.cboIntBdgtName.value
-        oncoreName = Me.cboOncoreName.value
+        ibArrayIndex = Me.cboIntBdgtName.value
+        oncoreArrayIndex = Me.cboOncoreName.value
         
         'remove item from combobox
-        Me.cboIntBdgtName.RemoveItem ibIndex
+        Me.cboIntBdgtName.RemoveItem ibCboIndex
         
         'remove item from collection
-        ibColl.Remove ibIndex + 1
+        ibColl.Remove ibCboIndex + 1
         
         'update combobox view
-        Call UpdatedCboView(Me.cboIntBdgtName, ibIndex)
+        Call UpdatedCboView(Me.cboIntBdgtName, ibCboIndex)
             
         'remove item from combobox
-        Me.cboOncoreName.RemoveItem oncoreIndex
+        Me.cboOncoreName.RemoveItem oncoreCboIndex
         
         'remove item from collection
-        oncoreColl.Remove oncoreIndex + 1
+        oncoreColl.Remove oncoreCboIndex + 1
         
         'update combobox view
-        Call UpdatedCboView(Me.cboOncoreName, oncoreIndex)
+        Call UpdatedCboView(Me.cboOncoreName, oncoreCboIndex)
         
+        ' update map for paired item: update names and corresponding column in oncore
+        ibArr(5, ibArrayIndex) = oncoreArr(4, oncoreArrayIndex)
+        
+        If Not isProcedure Then
+            ibArr(1, ibArrayIndex) = oncoreArr(1, oncoreArrayIndex)
+            ibArr(2, ibArrayIndex) = oncoreArr(2, oncoreArrayIndex)
+        Else
+            ibArr(3, ibArrayIndex) = oncoreArr(3, oncoreArrayIndex)
+        End If
+            
+        ' update oncoreArray to show there is a match
+        oncoreArr(5, oncoreArrayIndex) = 1
+                
         'update name on the internal budget
-        Set cell = FindCell(ibName)
-        With cell
-            'activate workbook
-            .Worksheet.Parent.Activate
-            'activate worksheet
-            .Worksheet.Activate
-            'select
-            .Select
-            .value = oncoreName
-            .Interior.color = RGB(255, 255, 0)  'fill yellow color
-        End With
+        If Not isProcedure Then
+            
+            Set cell = ib_selectedRng.Worksheet.Cells(ib_selectedRng.Row, ibArr(4, ibArrayIndex))
+        
+            'visit
+            If cell.value <> ibArr(2, ibArrayIndex) Then
+                With cell
+                    .value = ibArr(2, ibArrayIndex)
+                    .Interior.color = RGB(255, 255, 0)  'fill yellow color
+                    'activate workbook
+                    .Worksheet.Parent.Activate
+                    'activate worksheet
+                    .Worksheet.Activate
+                    'select
+                    .Select
+                End With
+            End If
+            
+            ' segment
+            Set cell = cell.Offset(-1, 0)
+            If cell.value <> ibArr(1, ibArrayIndex) Then
+                With cell
+                    .value = ibArr(1, ibArrayIndex)
+                    .Interior.color = RGB(255, 255, 0)  'fill yellow color
+                    'activate workbook
+                    .Worksheet.Parent.Activate
+                    'activate worksheet
+                    .Worksheet.Activate
+                    'select
+                    .Select
+                End With
+            
+            End If
+        Else
+            Set cell = ib_selectedRng.Worksheet.Cells(ibArr(4, ibArrayIndex), ib_selectedRng.column)
+        
+            'procedure
+            If cell.value <> ibArr(3, ibArrayIndex) Then
+                With cell
+                    .value = ibArr(3, ibArrayIndex)
+                    .Interior.color = RGB(255, 255, 0)  'fill yellow color
+                    'activate workbook
+                    .Worksheet.Parent.Activate
+                    'activate worksheet
+                    .Worksheet.Activate
+                    'select
+                    .Select
+                End With
+            End If
+        End If
     End If
 
 End Sub
 
 Private Sub cboIntBdgtName_Change()
     Dim cell As Range
-    Set cell = FindCell(Me.cboIntBdgtName.value)
     
-    If Not cell Is Nothing Then
-        With cell
-            'activate workbook
-            .Worksheet.Parent.Activate
-            'activate worksheet
-            .Worksheet.Activate
-            'select
-            .Select
-        End With
+    If Me.cboIntBdgtName.value <> "" Then
+    
+        If isProcedure Then
+            Set cell = ib_selectedRng.Worksheet.Cells(ibArr(4, Me.cboIntBdgtName.value), ib_selectedRng.column)
+        Else
+            Set cell = ib_selectedRng.Worksheet.Cells(ib_selectedRng.Row, ibArr(4, Me.cboIntBdgtName.value))
+        End If
+    
+        If Not cell Is Nothing Then
+            With cell
+                'activate workbook
+                .Worksheet.Parent.Activate
+                'activate worksheet
+                .Worksheet.Activate
+                'select
+                .Select
+            End With
+        End If
     End If
 End Sub
-
-Private Function FindCell(ibName As String) As Range
-
-    Dim cell As Range
-    
-    For Each cell In ibRng.Cells
-        If Application.WorksheetFunction.Trim(Application.WorksheetFunction.Clean(cell.value)) = ibName Then
-            Set FindCell = cell
-            Exit For 'ensures that the first found instance is returned
-        End If
-    Next cell
-
-End Function
 
 Private Sub UpdatedCboView(cbo As ComboBox, index As Integer)
 
@@ -204,3 +288,5 @@ Private Sub UpdatedCboView(cbo As ComboBox, index As Integer)
     End If
 
 End Sub
+
+
