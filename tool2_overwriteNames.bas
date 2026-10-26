@@ -98,14 +98,22 @@ Function OverwriteProcedureAndVisitNames(ib_proceduresArray() As Variant, _
     Call ShowModelessFormAndPause(frmProcedures)
     'if true unload both forms and exit sub
     If frmProcedures.IsTerminated Then
+        'update arrays
+        ib_proceduresArray = frmProcedures.IbArray
+        oncore_proceduresArray = frmProcedures.OncoreArray
+        
         terminateFlag = CloseAndCleanUp(frmProcedures, frmVisits, oncore_proceduresRng)
         GoTo SkipVisitNames
     End If
     
     'show the user form
-    Call ShowModelessFormAndPause_Visits(frmVisits)
+    Call ShowModelessFormAndPause(frmVisits)
     'if true unload both forms and exit sub
     If frmVisits.IsTerminated Then
+        'update arrays
+        ib_visitsArray = frmVisits.IbArray
+        oncore_visitsArray = frmVisits.OncoreArray
+    
         terminateFlag = CloseAndCleanUp(frmProcedures, frmVisits, oncore_proceduresRng)
     End If
     
@@ -121,12 +129,19 @@ SkipVisitNames:
         If Not wbReport Is Nothing Then
             ReportUnpaired
         End If
+        
+        'update arrays
+        ib_proceduresArray = frmProcedures.IbArray
+        oncore_proceduresArray = frmProcedures.OncoreArray
 
+        Unload frmProcedures
+
+        'update arrays
         ib_visitsArray = frmVisits.IbArray
         oncore_visitsArray = frmVisits.OncoreArray
 
-        Unload frmProcedures
         Unload frmVisits
+        
         Set wbReport = Nothing
     End If
 End Function
@@ -159,7 +174,7 @@ Sub ReportUnpaired()
     Dim totalVisits As Integer
     Dim totalProcedures As Integer
     
-    shUnpairedList = "Unpaired Proc and Visits List"
+    shUnpairedList = "Unpaired - Lists"
     shUnpairedMap = "Unpaired - OnCore Map"
     
     
@@ -259,12 +274,12 @@ Sub ReportUnpaired()
     With wbReport.Sheets(shUnpairedMap)
         note = "Note to Analyst: The following are OnCore headers. Procedure(s) and/or Visit(s) in bold black font currently do NOT have a matching pair on the Internal Budget." _
         & Chr(10) & "Internal Budget options:" _
-        & Chr(10) & " - pair equivalents: use the tool to pair equivalent procedure or visit names" _
-        & Chr(10) & " - expand selection: run the tool again and adjust and expand the selected ranges to capture the items" _
-        & Chr(10) & " - add new rows/columns: insert the missing procedures or visits directly into the Internal Budget and run the tool again" _
-        & Chr(10) & " - do nothing: ignore if these specific bold items are intentionally meant to be excluded"
+        & Chr(10) & " - pair equivalents: use the tool to pair equivalent procedure and/or visit names" _
+        & Chr(10) & " - expand selection: run the tool again and expand the selected ranges to capture the additional procedures and/or visits" _
+        & Chr(10) & " - add new rows/columns: insert the missing procedures and/or visits directly into the Internal Budget and run the tool again" _
+        & Chr(10) & " - do nothing: ignore if these specific procedures and/or visits in bold are intentionally excluded"
         
-        With .Cells(1.1)
+        With .Cells(1, 1)
             .ColumnWidth = 110
             .Font.color = vbRed
             .Font.Italic = True
@@ -341,29 +356,6 @@ Private Function CloseAndCleanUp(frmOne As frmTool2PairIntBdgtNames, frmTwo As f
 End Function
 
 Private Sub ShowModelessFormAndPause(frm As frmTool2PairIntBdgtNames)
-'show form
-    
-    With frm
-        'manual positioning
-        .StartUpPosition = 0
-        
-        'set left and top location
-        'currently set to bottom right of excel app
-        .Left = Application.Left + (1 * Application.Width) - (1 * .Width)
-        .Top = Application.Top + (1 * Application.Height) - (1 * .Height)
-        
-        .Show vbModeless
-    End With
-    
-    Do While frm.Visible
-        DoEvents  ' Allows Excel to respond to events
-    Loop
-    
-    ' Code here will run after the UserForm is closed or hidden
-    'MsgBox "Form closed, code resumes."
-End Sub
-
-Private Sub ShowModelessFormAndPause_Visits(frm As frmTool2PairIntBdgtNames)
 'show form
     
     With frm
